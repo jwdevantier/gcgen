@@ -29,10 +29,10 @@ jobs:
       uses: syphar/restore-virtualenv@v1
       id: cache-docs-venv
       with:
-        requirement_files: requirements-dev.txt
+        requirement_files: requirements.dev.txt
 
     - name: Install requirements
-      run: pip install -r requirements-dev.txt
+      run: pip install -r requirements.dev.txt
       if: steps.cache-docs-venv.outputs.cache-hit != 'true'
 
     - name: Generate docs
