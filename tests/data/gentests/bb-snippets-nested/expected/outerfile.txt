@@ -1,0 +1,14 @@
+
+My outer file...
+
+First foo:
+# [[start foo
+foo from outer ctx!
+scope["some-var"]: <<some-outer-val>>
+/outer foo end
+# end]]
+
+Then bar:
+# [[start bar
+bar from outer ctx!
+# end]]

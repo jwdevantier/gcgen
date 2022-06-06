@@ -1,0 +1,9 @@
+# [[start bar
+outer bar!
+outer foo!
+# end]]
+
+# [[start baz
+outer baz!
+outer foo!
+# end]]

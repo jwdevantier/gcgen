@@ -1,0 +1,3 @@
+something before the unclosed snippet
+# [[start baz
+we fail to end the snippet

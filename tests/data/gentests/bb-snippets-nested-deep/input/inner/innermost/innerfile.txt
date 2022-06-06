@@ -1,0 +1,10 @@
+
+My inner file!
+
+First foo:
+# [[start foo
+# end]]
+
+Then bar:
+# [[start bar
+# end]]

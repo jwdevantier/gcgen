@@ -1,0 +1,6 @@
+something before the unclosed snippet
+# [[start bar
+
+
+# [[start baz
+# end]]

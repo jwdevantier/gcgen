@@ -1,0 +1,10 @@
+# [[start greet
+Hello, John Doe!
+# end]]
+
+# [[start modify-scope
+# end]]
+
+# [[start greet
+Hello, Jane Doe!
+# end]]

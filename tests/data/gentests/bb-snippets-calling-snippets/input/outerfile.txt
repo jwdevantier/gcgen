@@ -1,0 +1,5 @@
+# [[start bar
+# end]]
+
+# [[start baz
+# end]]

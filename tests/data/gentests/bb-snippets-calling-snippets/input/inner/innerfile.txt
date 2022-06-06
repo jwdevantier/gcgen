@@ -1,0 +1,7 @@
+# bar snippet calls foo snippet directly, so uses the outer def of foo
+# [[start bar
+# end]]
+
+# delegates to foo, but uses dynamic lookup, so should use overridden foo def
+# [[start baz
+# end]]
