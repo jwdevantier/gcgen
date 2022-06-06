@@ -1,11 +1,11 @@
-Codegen Documentation
+gcgen Documentation
 ===================================
-Codegen aims to provide a minimal, yet useful tool to aid with code generation, 
+gcgen aims to provide a minimal, yet useful tool to aid with code generation, 
 predominantly by allowing you to weave snippets of generated code in among
 otherwise hand-written code, though generating entire files from scratch
 is also supported.
 
-Codegen is written for ease of use, thus it:
+gcgen is written for ease of use, thus it:
 
 * Enables active code-generation
 * Allows generated code to be mixed in among hand-written code

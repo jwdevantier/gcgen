@@ -25,11 +25,11 @@ jobs:
     - name: Build
       run: |
         python setup.py build
-    # - name: Build and upload wheel
-    #   if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
-    #   run: |
-    #     echo "Building wheel and uploading"
-    #     pip install wheel twine
-    #     python setup.py sdist bdist_wheel
-    #     echo "Uploading source code"
-    #     python -m twine upload --verbose --non-interactive --skip-existing -u '__token__' -p ${{ secrets.PYPI_API_TOKEN }} dist/*
+    - name: Build and upload wheel
+      if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+      run: |
+        echo "Building wheel and uploading"
+        pip install wheel twine
+        python setup.py sdist bdist_wheel
+        echo "Uploading source code"
+        python -m twine upload --verbose --non-interactive --skip-existing -u '__token__' -p ${{ secrets.PYPI_API_TOKEN }} dist/*
