@@ -21,7 +21,7 @@ setup(
     version=version,
     author="Jesper Wendel Devantier",
     author_email="jwd@defmacro.it",
-    url="https://github.com/jwdevantier/codegen",
+    url="https://jwdevantier.github.io/gcgen/",
     packages=find_packages(exclude=["tests"]),
     install_requires=[],
     entry_points={"console_scripts": ["gcgen = gcgen.__main__:main"]},
