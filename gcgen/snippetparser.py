@@ -4,7 +4,7 @@ from io import TextIOWrapper
 from gcgen.log import get_logger, LogLevel
 
 
-logger = get_logger(__name__, LogLevel.DEBUG)
+logger = get_logger(__name__)
 
 
 class SnippetParseError(Exception):
