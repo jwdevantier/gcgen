@@ -21,7 +21,7 @@ from gcgen.log import get_logger, LogLevel
 from gcgen.api.snippets_helpers import SnippetFn
 
 
-logger = get_logger(__name__, LogLevel.DEBUG)
+logger = get_logger(__name__)
 
 
 class SnippetException(Exception):
