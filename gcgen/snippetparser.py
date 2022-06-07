@@ -1,10 +1,13 @@
 from pathlib import Path
 from os import replace as os_replace
 from io import TextIOWrapper
+from re import compile as re_compile
 from gcgen.log import get_logger, LogLevel
 
 
 logger = get_logger(__name__)
+
+rgx_ws_prefix = re_compile(r"^(?P<prefix>\s*).*$")
 
 
 class SnippetParseError(Exception):
@@ -75,7 +78,11 @@ class ParserBase:
                         break
 
                     s_end = f"{prefix}{snippet_end}"
-                    snippet_prefix = " " * (len(prefix) - len(prefix.lstrip()))
+                    prefix_match = rgx_ws_prefix.match(prefix)
+                    assert (
+                        prefix_match is not None
+                    ), "regex failed to extract line whitespace prefix"
+                    snippet_prefix = prefix_match.group(1)
                     logger.debug(f"snippet_name: {snippet_name}")
                     logger.debug(f"raw prefix {prefix!r} (len: {len(prefix)})")
                     logger.debug(
