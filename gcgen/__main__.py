@@ -1,11 +1,12 @@
 import argparse
-from gcgen.emitter import Emitter
-import gcgen.generate as gen
+import functools
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from gcgen.log import loggers_set_log_level, LogLevel, get_logger
 import sys
 import configparser
+import traceback
+import gcgen.generate as gen
+from gcgen.log import loggers_set_log_level, LogLevel, get_logger
+from gcgen.excbase import GcgenError
 
 
 logger = get_logger(__name__, LogLevel.DEBUG)
@@ -45,33 +46,27 @@ cliparse.add_argument(
 )
 
 
+def pp_error(f):
+    """catch and pretty-print GcgenError's which have a pretty-print function."""
+
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            f(*args, **kwargs)
+        except GcgenError as exc:
+            print("\nError Traceback:")
+            print(traceback.format_exc())
+            exc.printerr()
+            sys.exit(1)
+
+    return wrapper
+
+
+@pp_error
 def main():
     args = cliparse.parse_args()
     if args.project_root is None:
-        try:
-            project_root = gen.find_project_root(Path.cwd())
-        except gen.ProjectRootNotFoundError:
-            print("Failed to find project root directory!")
-            print("")
-            print(
-                "Project root directory was not explicitly provided (i.e `-p /path/to/project`)."
-            )
-            print(
-                "Instead, we try to determine the project root by looking at the current directory"
-            )
-            print(
-                "and each of the parent directories, first looking for a `gcgen_project.ini` configuration"
-            )
-            print(
-                "file which would mark the top-level directory of the project, secondarily for a "
-            )
-            print("`.git` folder.")
-            print("")
-            print(
-                "We failed to find either before searching the root directory of the file system."
-            )
-            print("TIP: create a `gcgen_project.ini` file in the root of your project.")
-            sys.exit(1)
+        project_root = gen.find_project_root(Path.cwd())
     else:
         project_root = Path(args.project_root)
         if not project_root.exists():
@@ -123,34 +118,6 @@ def main():
 
     gen.compile(project_root, tag_start=tag_start, tag_end=tag_end)
 
-
-# TODO: save until later, measure speed with (some) generation
-#       reuse mp trick somewhere in compiler.. I think..
-# @app.command()
-# def parse5(proj: Path):
-#     from gcgen import snippetparser
-#
-#     if not proj.is_dir():
-#         raise RuntimeError("must be a directory")
-#     import time
-#
-#     parse5 = snippetparser.parse5
-#     start = time.time()
-#     from multiprocessing import cpu_count
-#
-#     with ProcessPoolExecutor(cpu_count()) as pool:
-#         for path in proj.rglob("*.c"):
-#             dpath = path.parent / f"{path.name}.gcgen"
-#             pool.submit(parse5, path, dpath, "[[start", "end]]")
-#     end = time.time()
-#     print(f"elapsed: {end - start}s")
-#     nfiles = 0
-#     for _ in proj.rglob("*.c"):
-#         nfiles += 1
-#
-#     print(f"processed {nfiles}")
-#     print(f"{nfiles / (end - start)} files/second")
-#
 
 if __name__ == "__main__":
     main()

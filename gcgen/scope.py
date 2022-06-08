@@ -1,3 +1,5 @@
+from functools import reduce
+
 _TOMBSTONE = object()
 
 
@@ -108,6 +110,17 @@ class Scope:
     def update(self, other: dict):
         """Update scope with all entries from `other`."""
         self._dict.update(other)
+
+    def to_dict(self) -> dict:
+        """flatten scopes out to a dict."""
+        dicts = []
+        s = self
+        while s:
+            dicts.append(s._dict)
+            s = s._outer
+        dicts.reverse()
+
+        return {k: v for d in dicts for k, v in d.items() if v != _TOMBSTONE}
 
 
 __all__ = ["Scope"]

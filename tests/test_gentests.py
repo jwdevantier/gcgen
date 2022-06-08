@@ -162,7 +162,7 @@ def test_bb_snippets_unclosed_snippet_err():
 
 def test_bb_snippets_unclosed_snippet_err():
     with load_gentest("bb-snippets-err-unclosed-snippet") as gtc:
-        with pytest.raises(UnclosedSnippetError, match=r"reached end of file"):
+        with pytest.raises(UnclosedSnippetError):
             generate.compile(gtc.input_path)
 
 

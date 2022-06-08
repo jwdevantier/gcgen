@@ -3,6 +3,7 @@ from os import replace as os_replace
 from io import TextIOWrapper
 from re import compile as re_compile
 from gcgen.log import get_logger, LogLevel
+from gcgen.excbase import GcgenError
 
 
 logger = get_logger(__name__)
@@ -10,29 +11,58 @@ logger = get_logger(__name__)
 rgx_ws_prefix = re_compile(r"^(?P<prefix>\s*).*$")
 
 
-class SnippetParseError(Exception):
+class SnippetParseError(GcgenError):
     pass
 
 
 class UnclosedSnippetError(SnippetParseError):
-    def __init__(
-        self, msg: str, file: Path, snippet: str, line_start: int, line_err: int
-    ):
+    def __init__(self, file: Path, snippet: str, line_start: int, line_err: int):
         self.file = file
         self.snippet = snippet
         self.line_start = line_start
         self.line_err = line_err
-        self.err_msg = msg
         super().__init__(
-            f"{file!s}, error in snippet {snippet!s}, line: {line_err}: unclosed snippet, {msg}"
+            f"{file!s}, error in snippet {snippet!s}, line: {line_err}: unclosed snippet"
         )
 
+    def printerr(self) -> None:
+        print("Unclosed Snippet Error:")
+        print("")
+        print("Reached end of file without finding a corresponding snippet close")
+        print("")
+        print("Details:")
+        print(f"  File: {self.file}")
+        print(f"  Snippet: {self.snippet!r}")
+        print(f"  Snippet Start Line: {self.line_start}")
 
-class NestedSnippetsError(UnclosedSnippetError):
+
+class NestedSnippetsError(SnippetParseError):
     def __init__(self, file: Path, snippet: str, line_start: int, line_err: int):
+        self.file = file
+        self.snippet = snippet
+        self.line_start = line_start
+        self.line_err = line_err
+
         super().__init__(
-            "found start of new snippet", file, snippet, line_start, line_err
+            "found start of new snippet while processing snippet",
+            file,
+            snippet,
+            line_start,
+            line_err,
         )
+
+    def printerr(self) -> None:
+        print("Nested Snippets Error:")
+        print("")
+        print(
+            "Encountered line marking start of new snippet before current snippet end."
+        )
+        print("")
+        print("Details:")
+        print(f"  File: {self.file}")
+        print(f"  Snippet: {self.snippet!r}")
+        print(f"  Snippet start line: {self.line_start}")
+        print(f"  Error line: {self.line_err}")
 
 
 class ParserBase:
@@ -107,7 +137,6 @@ class ParserBase:
                         # we exhausted the file line iterator without finding a corresponding
                         # snippet end, so we abort, this is an error
                         raise UnclosedSnippetError(
-                            "reached end of file without finding snippet end",
                             fpath,
                             snippet_name,
                             snippet_line_start,

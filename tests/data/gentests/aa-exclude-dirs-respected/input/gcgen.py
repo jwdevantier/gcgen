@@ -1,2 +1,2 @@
-def exclude_dirs():
+def gcgen_exclude_dirs():
     return {"inner"}
