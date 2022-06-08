@@ -64,6 +64,8 @@ def pp_error(f):
 
 @pp_error
 def main():
+    print("gcgen running...")
+    print("See documentation at: https://jwdevantier.github.io/gcgen")
     args = cliparse.parse_args()
     if args.project_root is None:
         project_root = gen.find_project_root(Path.cwd())
