@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List, cast
 from enum import Enum
 
 format = logging.Formatter("%(levelname)s - %(name)s: %(message)s")
@@ -14,26 +14,47 @@ class LogLevel(Enum):
     CRITICAL = logging.CRITICAL
 
 
-_loggers = []
 _default_loglevel = LogLevel.CRITICAL
+_current_log_level = None
+_fallback_loglevels = {}
 
 
-def get_logger(name: str, level: Optional[LogLevel] = None) -> logging.Logger:
+def has_logger(name: str) -> bool:
+    return name in logging.Logger.manager.loggerDict
+
+
+def all_loggers() -> List[logging.Logger]:
+    return cast(
+        List[logging.Logger],
+        list(
+            l
+            for l in logging.Logger.manager.loggerDict.values()
+            if isinstance(l, logging.Logger)
+        ),
+    )
+
+
+def get_logger(
+    name: str, default_loglevel: Optional[LogLevel] = None
+) -> logging.Logger:
     """get a logger, use `__name__` by convention."""
-    global _loggers
-    l = logging.getLogger(name)
-    if level:
-        l.setLevel(level.value)
+    if not has_logger(name):
+        v = default_loglevel or _default_loglevel
+        if isinstance(v, LogLevel):
+            v = v.value
+        _fallback_loglevels[name] = v
+        l = logging.getLogger(name)
+        l.setLevel(_current_log_level or _fallback_loglevels[name])
+        return l
     else:
-        l.setLevel(_default_loglevel.value)
-    return l
+        return logging.getLogger()
 
 
 def loggers_set_log_level(level: LogLevel):
-    global _default_loglevel
-    for logger in _loggers:
+    global _current_log_level
+    _current_log_level = level
+    for logger in all_loggers():
         logger.setLevel(level.value)
-    _default_loglevel = level
 
 
 if __name__ != "__main__":
