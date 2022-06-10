@@ -14,7 +14,7 @@ class LogLevel(Enum):
     CRITICAL = logging.CRITICAL
 
 
-_default_loglevel = LogLevel.CRITICAL
+_default_loglevel = LogLevel.WARNING
 _current_log_level = None
 _fallback_loglevels = {}
 

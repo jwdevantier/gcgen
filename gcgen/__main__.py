@@ -9,7 +9,7 @@ from gcgen.log import loggers_set_log_level, LogLevel, get_logger
 from gcgen.excbase import GcgenError
 
 
-logger = get_logger(__name__, LogLevel.DEBUG)
+logger = get_logger(__name__, LogLevel.INFO)
 
 cliparse = argparse.ArgumentParser(
     description="generate output into snippets embedded in files or create files from scratch with generators"
