@@ -222,7 +222,7 @@ class CompileExcludeFilesError(CompileError):
         print("")
         print("Details:")
         print(f"  config: {self.conf_path}")
-        print(f"  hook: cgen_exclude_dirs")
+        print(f"  hook: gcgen_exclude_dirs")
 
 
 class CompileGeneratorFunctionError(CompileError):
@@ -280,7 +280,7 @@ class ParseFilesInvalidValue(ParseFilesError):
         else:
             # only print this way if type is different from expected
             print(f"  entry: {self.fpath!r}")
-        print(f"  hook: cgen_parse_files")
+        print(f"  hook: gcgen_parse_files")
 
 
 class ParseFileNotFoundError(ParseFilesError):
@@ -299,7 +299,7 @@ class ParseFileNotFoundError(ParseFilesError):
         print("Details:")
         print(f"  conf: {self.conf_path}")
         print(f"  entry: {self.fpath}")
-        print(f"  hook: cgen_parse_files")
+        print(f"  hook: gcgen_parse_files")
 
 
 class ParseFileNotFileError(ParseFilesError):
@@ -317,7 +317,7 @@ class ParseFileNotFileError(ParseFilesError):
         print("Details:")
         print(f"  conf: {self.conf_path}")
         print(f"  entry: {self.fpath}")
-        print(f"  hook: cgen_parse_files")
+        print(f"  hook: gcgen_parse_files")
 
 
 class IndentByValueError(GcgenError):
@@ -453,7 +453,7 @@ def compile(root: Path, tag_start: str = "[[start", tag_end: str = "end]]"):
                 file = Path(file)
                 if str(file) != file.name:
                     logger.error(
-                        f"{file!s} - entries in `cgen_parse_files` must be plain filenames, not paths!",
+                        f"{file!s} - entries in `gcgen_parse_files` must be plain filenames, not paths!",
                     )
                     raise ParseFilesInvalidValue(file, gcgen_conf_path)
 
