@@ -1,16 +1,16 @@
-# [[start hello
+# <<? hello
 hello stranger...
-# end]]
+# ?>>
 
-# [[start hello null
+# <<? hello null
 hello stranger...
-# end]]
+# ?>>
 
-# [[start hello "Jane"
+# <<? hello "Jane"
 hello Jane!
-# end]]
+# ?>>
 
-# [[start print_files ["/etc/passwd", "/etc/issue"]
+# <<? print_files ["/etc/passwd", "/etc/issue"]
 printing file '/etc/passwd'...
 printing file '/etc/issue'...
-# end]]
+# ?>>

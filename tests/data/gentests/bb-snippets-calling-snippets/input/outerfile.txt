@@ -1,5 +1,5 @@
-# [[start bar
-# end]]
+# <<? bar
+# ?>>
 
-# [[start baz
-# end]]
+# <<? baz
+# ?>>

@@ -377,7 +377,7 @@ def get_mod_snippet_fns(mod: ModuleType) -> Dict[str, Callable]:
     return {name: fn for name, fn in mod.__dict__.items() if decorators.is_snippet(fn)}
 
 
-def compile(root: Path, tag_start: str = "[[start", tag_end: str = "end]]"):
+def compile(root: Path, tag_start: str = "<<?", tag_end: str = "?>>"):
     # in case `root` is a relative path like '.', resolve to absolute path
     # for later use, where cwd changes.
     root = root.resolve()

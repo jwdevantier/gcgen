@@ -33,8 +33,8 @@ following:
     :linenos:
 
     [parse]
-    tag_start = "[[start"
-    tag_end = "end]]"
+    tag_start = <<?
+    tag_end = ?>>
 
     [log]
     level = warning

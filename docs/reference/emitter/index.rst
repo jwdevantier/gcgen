@@ -39,8 +39,8 @@ Given the following file:
     :caption: myfile.py
 
     def some_function():
-        # [[start include_file_output "/etc/issue"
-        # end]]
+        # <<? include_file_output "/etc/issue"
+        # ?>>
 
 
 The expanded output would become:
@@ -49,11 +49,11 @@ The expanded output would become:
     :caption: myfile.py
 
     def some_function():
-        # [[start include_file_output "/etc/issue"
+        # <<? include_file_output "/etc/issue"
         with open("/etc/issue") as fh:
             for lines in fh.readlines()
                 ...
-        # end]]
+        # ?>>
 
 
 **Note**: While the emitter controls the level of indentation, the characters

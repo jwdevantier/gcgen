@@ -1,10 +1,10 @@
-# [[start greet
+# <<? greet
 Hello, John Doe!
-# end]]
+# ?>>
 
-# [[start modify-scope
-# end]]
+# <<? modify-scope
+# ?>>
 
-# [[start greet
+# <<? greet
 Hello, Jane Doe!
-# end]]
+# ?>>

@@ -2,9 +2,9 @@
 My outer file...
 
 First foo:
-# [[start foo
-# end]]
+# <<? foo
+# ?>>
 
 Then bar:
-# [[start bar
-# end]]
+# <<? bar
+# ?>>

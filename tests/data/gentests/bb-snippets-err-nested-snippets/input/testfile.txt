@@ -1,6 +1,6 @@
 something before the unclosed snippet
-# [[start bar
+# <<? bar
 
 
-# [[start baz
-# end]]
+# <<? baz
+# ?>>

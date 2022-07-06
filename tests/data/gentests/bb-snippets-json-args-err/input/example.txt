@@ -1,13 +1,13 @@
-# [[start hello
-# end]]
+# <<? hello
+# ?>>
 
-# [[start hello null
-# end]]
+# <<? hello null
+# ?>>
 
-# [[start hello "Jane"
-# end]]
+# <<? hello "Jane"
+# ?>>
 
 # err here, wrong element separator
-# [[start print_files ["/etc/issue"; "/etc/passwd"]
-# end]]
+# <<? print_files ["/etc/issue"; "/etc/passwd"]
+# ?>>
 

@@ -1,9 +1,9 @@
-# [[start bar
+# <<? bar
 outer bar!
 outer foo!
-# end]]
+# ?>>
 
-# [[start baz
+# <<? baz
 outer baz!
 outer foo!
-# end]]
+# ?>>

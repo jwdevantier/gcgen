@@ -54,19 +54,19 @@ class CapturingParser(snippetparser.ParserBase):
 
 prog_w_noarg_snippets = """\
 print("hello, world")
-# [[start hello
-# end]]
+# <<? hello
+# ?>>
 
 def foo():
     print("inside foo")
-    # [[start smth
-    # end]]
+    # <<? smth
+    # ?>>
 """
 
 
 def test_prog_w_noarg_snippets():
     with tmpfile_of_str(prog_w_noarg_snippets) as fpath:
-        parser = CapturingParser("[[start", "end]]")
+        parser = CapturingParser("<<?", "?>>")
         parser.parse(fpath, fpath)
         assert parser._results == [
             SnippetResult(name="hello", prefix="", args=None),
@@ -76,28 +76,28 @@ def test_prog_w_noarg_snippets():
 
 prog_w_json_args = """\
 print("hello, world")
-# [[start hello
-# end]]
-# [[start hello null
-# end]]
-# [[start hello  
-# end]]
-# [[start hello "Jacque"
-# end]]
+# <<? hello
+# ?>>
+# <<? hello null
+# ?>>
+# <<? hello  
+# ?>>
+# <<? hello "Jacque"
+# ?>>
 
 def foo():
     print("inside foo")
-    # [[start print_files ["file1", "file2"]
-    # end]]
+    # <<? print_files ["file1", "file2"]
+    # ?>>
     print("...")
-    # [[start mk_user {"username": "jane", "groups": ["wheel", "docker"]}
-    # end]]
+    # <<? mk_user {"username": "jane", "groups": ["wheel", "docker"]}
+    # ?>>
 """
 
 
 def test_prog_w_json_args():
     with tmpfile_of_str(prog_w_json_args) as fpath:
-        parser = CapturingParser("[[start", "end]]")
+        parser = CapturingParser("<<?", "?>>")
         parser.parse(fpath, fpath)
         assert parser._results == [
             SnippetResult(name="hello", prefix="", args=None),

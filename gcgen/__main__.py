@@ -39,10 +39,10 @@ cliparse.add_argument(
 )
 
 cliparse.add_argument(
-    "--tag-start", action="store", dest="tag_start", help="set start tag (`[[start`)"
+    "--tag-start", action="store", dest="tag_start", help="set start tag (`<<?`)"
 )
 cliparse.add_argument(
-    "--tag-end", action="store", dest="tag_end", help="set end tag (`end]]`)"
+    "--tag-end", action="store", dest="tag_end", help="set end tag (`?>>`)"
 )
 
 
@@ -83,7 +83,7 @@ def main():
     config = configparser.ConfigParser()
     config.read_dict(
         {
-            "parse": {"tag_start": "[[start", "tag_end": "end]]"},
+            "parse": {"tag_start": "<<?", "tag_end": "?>>"},
             "log": {"level": "warning"},
         }
     )
