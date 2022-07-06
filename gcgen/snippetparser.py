@@ -148,7 +148,7 @@ class ParserBase:
                                         snippet_arg = json.loads(snippet_arg)
                                     except JSONDecodeError as e:
                                         raise SnippetJsonValueError(
-                                            fpath, snippet_name, snippet_arg_raw, e, snippet_line_start
+                                            fpath, snippet_name, snippet_arg_raw, e, lineno
                                         ) from e
                             break
 
