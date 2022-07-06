@@ -196,7 +196,9 @@ class CompileParseFilesError(CompileError):
         print("Exception while executing `gcgen_parse_files` hook")
         print("")
         print("Encountered an unhandled exception while executing the user-defined")
-        print("parse files hook in the `gcgen_conf.py` configuration file (see path below).")
+        print(
+            "parse files hook in the `gcgen_conf.py` configuration file (see path below)."
+        )
         print("Please see the exception traceback information above for details.")
         print("")
         print("Details:")

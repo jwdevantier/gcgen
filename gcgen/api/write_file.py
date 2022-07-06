@@ -28,7 +28,9 @@ class write_file(object):
         self._indent_by = indent_by
 
     def __enter__(self) -> Emitter:
-        self._fh = tempfile.NamedTemporaryFile("w", dir=self._fpath.parent, delete=False)
+        self._fh = tempfile.NamedTemporaryFile(
+            "w", dir=self._fpath.parent, delete=False
+        )
         self._emitter = Emitter(prefix="", indent_by=self._indent_by)
         return self._emitter
 
