@@ -2,6 +2,7 @@ import tempfile
 from os import rename as os_rename
 from pathlib import Path
 from gcgen.emitter import Emitter
+from typing import Union
 
 
 class write_file(object):
@@ -20,12 +21,14 @@ class write_file(object):
             defaults to a single space (' ').
     """
 
-    def __init__(self, fpath: Path, indent_by: str = " "):
-        self._fpath = fpath
+    def __init__(self, fpath: Union[Path, str], indent_by: str = " "):
+        if not isinstance(fpath, (str, Path)):
+            raise RuntimeError("path supplied must be a pathlib.Path or str")
+        self._fpath = fpath if isinstance(fpath, Path) else Path(fpath)
         self._indent_by = indent_by
 
     def __enter__(self) -> Emitter:
-        self._fh = tempfile.NamedTemporaryFile("w", delete=False)
+        self._fh = tempfile.NamedTemporaryFile("w", dir=self._fpath.parent, delete=False)
         self._emitter = Emitter(prefix="", indent_by=self._indent_by)
         return self._emitter
 
@@ -39,9 +42,10 @@ class write_file(object):
             for line in self._emitter.lines():
                 self._fh.write(line)
             self._fh.close()
-            os_rename(self._fh.name, self._fpath)
-        except Exception:
+            os_rename(src=self._fh.name, dst=self._fpath)
+        except Exception as e:
             self._fh.close()
             p = Path(self._fh.name)
             if p.exists():
                 p.unlink()
+            raise e
