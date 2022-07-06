@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import List
-from gcgen.api import snippet, Emitter, Scope
+from gcgen.api import snippet, Emitter, Scope, Json
 
 
 gcgen_indent_by = {
@@ -9,13 +9,13 @@ gcgen_indent_by = {
 
 
 @snippet("sumfn")
-def gen_sumfn(e: Emitter, s: Scope):
+def gen_sumfn(e: Emitter, s: Scope, val: Json):
     e.emitln_r("def sum(a, b):")
     e.emitln("return a + b")
 
 
 @snippet("something_else_middle")
-def smth_else_middle(e: Emitter, s: Scope):
+def smth_else_middle(e: Emitter, s: Scope, val: Json):
     e.emitln("a += 100")
     e.emitln("a += 1000")
 

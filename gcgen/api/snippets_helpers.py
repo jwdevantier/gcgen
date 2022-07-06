@@ -1,9 +1,10 @@
 from gcgen.scope import Scope
 from gcgen.emitter import Emitter
+from gcgen.api.types import Json
 from typing import Callable
 
 
-SnippetFn = Callable[[Emitter, Scope], None]
+SnippetFn = Callable[[Emitter, Scope, Json], None]
 
 
 unset = object()

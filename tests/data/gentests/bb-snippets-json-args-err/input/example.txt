@@ -1,0 +1,13 @@
+# [[start hello
+# end]]
+
+# [[start hello null
+# end]]
+
+# [[start hello "Jane"
+# end]]
+
+# err here, wrong element separator
+# [[start print_files ["/etc/issue"; "/etc/passwd"]
+# end]]
+

@@ -15,7 +15,7 @@ import os
 from io import TextIOWrapper
 from gcgen.scope import Scope
 from gcgen import decorators
-from gcgen.snippetparser import ParserBase
+from gcgen.snippetparser import ParserBase, Json
 from gcgen.emitter import Emitter
 from gcgen.log import get_logger, LogLevel
 from gcgen.api.snippets_helpers import SnippetFn
@@ -106,7 +106,7 @@ class Parser(ParserBase):
         self._scope = scope
 
     def on_snippet(
-        self, snippet_name: str, snippet_prefix: str, src_path: Path, fh: TextIOWrapper
+        self, snippet_prefix: str, snippet_name: str, snippet_arg: Json, src_path: Path, fh: TextIOWrapper
     ):
         logger.debug(f"on_snippet {snippet_name!r} called")
         snippet_fn: Union[SnippetFn, None] = self._snippets_scope.get(
@@ -124,7 +124,7 @@ class Parser(ParserBase):
         scope["$file"] = fpath
         scope["$snippets"] = self._snippets_scope.derive()
         try:
-            snippet_fn(emitter, scope)
+            snippet_fn(emitter, scope, snippet_arg)
         except Exception as e:
             logger.error(
                 f"error executing snippet {snippet_name!r} in {fpath!s}", exc_info=True

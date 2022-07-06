@@ -6,7 +6,7 @@ import hashlib
 from setuptools._distutils.dir_util import copy_tree
 from typing import Dict, List
 from gcgen import generate
-from gcgen.snippetparser import UnclosedSnippetError, NestedSnippetsError
+from gcgen.snippetparser import UnclosedSnippetError, NestedSnippetsError, SnippetJsonValueError
 import pytest
 import logging
 
@@ -152,6 +152,18 @@ def test_bb_snippets_calling_snippets():
     gentest_test_eql(
         "bb-snippets-calling-snippets", ["outerfile.txt", "inner/innerfile.txt"]
     )
+
+
+def test_bb_snippets_json_args():
+    gentest_test_eql(
+        "bb-snippets-json-args", ["example.txt"]
+    )
+
+
+def test_bb_snippets_json_args_err():
+    with load_gentest("bb-snippets-json-args-err") as gtc:
+        with pytest.raises(SnippetJsonValueError):
+            generate.compile(gtc.input_path)
 
 
 def test_bb_snippets_err_nested_snippets():

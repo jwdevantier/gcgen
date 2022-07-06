@@ -1,8 +1,8 @@
-from gcgen.api import snippet, Emitter, Scope
+from gcgen.api import snippet, Emitter, Scope, Json
 
 
 @snippet("baz")
-def s_baz(e: Emitter, scope: Scope):
+def s_baz(e: Emitter, scope: Scope, val: Json):
     pass
 
 

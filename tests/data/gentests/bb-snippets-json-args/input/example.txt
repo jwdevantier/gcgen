@@ -1,0 +1,11 @@
+# [[start hello
+# end]]
+
+# [[start hello null
+# end]]
+
+# [[start hello "Jane"
+# end]]
+
+# [[start print_files ["/etc/passwd", "/etc/issue"]
+# end]]

@@ -1,4 +1,4 @@
-from gcgen.api import Emitter, Scope, snippet
+from gcgen.api import Emitter, Scope, snippet, Json
 from typing import List
 
 
@@ -13,14 +13,14 @@ def gcgen_scope_extend(s: Scope):
 
 
 @snippet("foo")
-def s_foo(e: Emitter, s: Scope):
+def s_foo(e: Emitter, s: Scope, val: Json):
     e.emitln("foo from outer ctx!")
     e.emitln(f"""scope["some-var"]: {s["some-var"]}""")
     e.emitln("/outer foo end")
 
 
 @snippet("bar")
-def name_does_not_matter(e: Emitter, s: Scope):
+def name_does_not_matter(e: Emitter, s: Scope, val: Json):
     e.emitln("bar from outer ctx!")
 
 
