@@ -63,7 +63,7 @@ Prerequisites
 ~~~~~~~~~~~~~
 To parse a file, ``foo.txt`` for snippets, gcgen first requires that: 
 
-1. the directory of the file must have a ``gcgen.py`` file
+1. the directory of the file must have a ``gcgen_conf.py`` file
    (:ref:`link <sec-ref-gcgen-file>`)
 2. the gcgen file must implement the ``cgen_parse_hook`` and this must
    return a list of filenames where ``foo.txt`` is among them.
@@ -71,8 +71,8 @@ To parse a file, ``foo.txt`` for snippets, gcgen first requires that:
 
 Additionally, for gcgen to parse the file successfully, each snippet that
 ``foo.txt`` uses must be :ref:`defined <sec-ref-snippets-def>` either in the
-``gcgen.py`` file in the same directory as ``foo.txt``, or in any of the
-``gcgen.py`` files in the parent directories.
+``gcgen_conf.py`` file in the same directory as ``foo.txt``, or in any of the
+``gcgen_conf.py`` files in the parent directories.
 
 
 .. _sec-ref-snippets-def:
@@ -92,7 +92,7 @@ defines the name to give it.
     :caption: defining a new snippet
     :emphasize-lines: 5, 6
 
-    # (inside a gcgen.py file)
+    # (inside a gcgen_conf.py file)
     from gcgen.api import Emitter, Scope, snippet
 
 
@@ -113,10 +113,10 @@ function to give it additional names.
 Snippet scope
 ~~~~~~~~~~~~~
 Snippet definitions work like entries in the :ref:`scope <sec-ref-scope>`:
-a snippet defined in some ``gcgen.py`` file is available to all source files in
+a snippet defined in some ``gcgen_conf.py`` file is available to all source files in
 that directory or any of its subdirectories.
 
-Similarly to scope entries, it is also possible for a ``gcgen.py`` file to
+Similarly to scope entries, it is also possible for a ``gcgen_conf.py`` file to
 override a snippet definition from the parent scope, by defining a new
 snippet function and annotating it with the name of the snippet to override.
 This, just like variable entries in the scope, will only affect the current

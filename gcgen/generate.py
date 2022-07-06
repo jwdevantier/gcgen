@@ -176,7 +176,7 @@ class CompileScopeExtendError(CompileError):
         print("")
         print("Encountered an unhandled exception while executing the user-defined")
         print(
-            "scope extend hook in the `gcgen.py` configuration file (see path below)."
+            "scope extend hook in the `gcgen_conf.py` configuration file (see path below)."
         )
         print("Please see the exception traceback information above for details.")
         print("")
@@ -196,7 +196,7 @@ class CompileParseFilesError(CompileError):
         print("Exception while executing `gcgen_parse_files` hook")
         print("")
         print("Encountered an unhandled exception while executing the user-defined")
-        print("parse files hook in the `gcgen.py` configuration file (see path below).")
+        print("parse files hook in the `gcgen_conf.py` configuration file (see path below).")
         print("Please see the exception traceback information above for details.")
         print("")
         print("Details:")
@@ -214,7 +214,7 @@ class CompileExcludeFilesError(CompileError):
         print("")
         print("Encountered an unhandled exception while executing the user-defined")
         print(
-            "exclude dirs hook in the `gcgen.py` configuration file (see path below)."
+            "exclude dirs hook in the `gcgen_conf.py` configuration file (see path below)."
         )
         print("Please see the exception traceback information above for details.")
         print("")
@@ -236,7 +236,7 @@ class CompileGeneratorFunctionError(CompileError):
         print("")
         print("Encountered an unhandled exception while executing the user-defined")
         print(
-            f"generator function {self.generator_fn_name!r} defined in the `gcgen.py` configuration"
+            f"generator function {self.generator_fn_name!r} defined in the `gcgen_conf.py` configuration"
         )
         print("file mentioned below.")
         print("Please see the exception traceback information above for details.")
@@ -265,7 +265,7 @@ class ParseFilesInvalidValue(ParseFilesError):
         print("containined in other directories than the currently processed one.")
         print("")
         print(
-            "TIP: If you want these files to reside elsewhere, add a `gcgen.py` in that"
+            "TIP: If you want these files to reside elsewhere, add a `gcgen_conf.py` in that"
         )
         print(
             "directory, remove the entries from this file and re-run the compilation."
@@ -326,7 +326,7 @@ class IndentByValueError(GcgenError):
     def printerr(self) -> None:
         print("`gcen_indent_by` is not a dictionary!")
         print("")
-        print("The indent by variable in `gcgen.py` must be a dictionary value")
+        print("The indent by variable in `gcgen_conf.py` must be a dictionary value")
         print(
             "whose entries are strings matching filename suffixes (i.e. 'py', 'go', ...)"
         )
@@ -384,7 +384,7 @@ def compile(root: Path, tag_start: str = "[[start", tag_end: str = "end]]"):
         path: Path, parent_scope: Scope, snippets_scope: Scope, indent_by: Scope
     ):
         gcgen_mod = None
-        gcgen_conf_path = path / "gcgen.py"
+        gcgen_conf_path = path / "gcgen_conf.py"
         if gcgen_conf_path.exists():
             gcgen_mod = import_from_path(root, gcgen_conf_path)
         scope = parent_scope.derive()
@@ -433,7 +433,7 @@ def compile(root: Path, tag_start: str = "[[start", tag_end: str = "end]]"):
         if gcgen_mod is None:
             return
 
-        # operate from within the path containing the gcgen.py we are currently processing
+        # operate from within the path containing the gcgen_conf.py we are currently processing
         os.chdir(path)
         # parse snippets in any files explicitly listed as having them
         if hasattr(gcgen_mod, "gcgen_parse_files"):

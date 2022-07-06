@@ -46,8 +46,8 @@ The following configuration file implements the snippet, starting at line 5,
 and tells gcgen to process the ``my_mathlib.py``, expanding any snippets, by
 defining the ``gcgen_parse_files`` hook in line 27-30:
 
-.. literalinclude:: ../examples/01_intro/gcgen.py
-    :caption: gcgen.py -- gcgen configuration file
+.. literalinclude:: ../examples/01_intro/gcgen_conf.py
+    :caption: gcgen_conf.py -- gcgen configuration file
     :language: python
     :linenos:
 
@@ -63,7 +63,7 @@ to have the following contents:
 This example is a toy example, it demonstrates the basic concept, but
 cannot really illustrate the potential of code generation.
 As you come to understand scope and how subdirectories in your projects 
-can contain their own `gcgen.py` files which extend the scope, define new
+can contain their own `gcgen_conf.py` files which extend the scope, define new
 snippets or override the implementation of existing ones, 
 
 
@@ -112,7 +112,7 @@ The gcgen file(s)
 ~~~~~~~~~~~~~~~~~
 Both snippets and generators are defined in a 
 :ref:`gcgen file <sec-ref-gcgen-file>`. These files are always named 
-``gcgen.py``.
+``gcgen_conf.py``.
 When running ``gcgen`` inside a project, these files are imported and their
 definitions are used.
 

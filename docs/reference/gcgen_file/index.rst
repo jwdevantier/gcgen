@@ -4,7 +4,7 @@
 gcgen file
 ##########
 
-This page describes gcgen files, the files named `gcgen.py` which may be located
+This page describes gcgen files, the files named `gcgen_conf.py` which may be located
 in any subdirectory of the project, and which drive all aspects of code
 generation using gcgen.
 
@@ -13,7 +13,7 @@ directory and any subdirectories, hooks to specify which files should be parsed
 for snippets. Snippet and generator definitions, file indentation rules and
 more.
 
-gcgen requires a `gcgen.py` file in each directory whose files might contain
+gcgen requires a `gcgen_conf.py` file in each directory whose files might contain
 snippets to parse or where generators should create new files from scratch.
 This in turn encourages keeping snippet definitions and specific scope variables
 local to those subdirectories which use them.
@@ -36,11 +36,11 @@ Parse files
 When adding :ref:`snippets <sec-ref-snippets>` to a file, you also need to
 tell gcgen to parse that file for code-generation to work.
 
-In the same directory, create a ``gcgen.py`` file and implement the
+In the same directory, create a ``gcgen_conf.py`` file and implement the
 ``gcgen_parse_files`` hook like so:
 
 .. code-block:: python3
-    :caption: gcgen.py - parse files
+    :caption: gcgen_conf.py - parse files
     :linenos:
 
 
@@ -52,7 +52,7 @@ In the same directory, create a ``gcgen.py`` file and implement the
 
 This extra step may seem onerous, but it drastically speeds up the compilation
 process, which would otherwise have to parse every file, line-by-line.
-Furthermore, it requires creating ``gcgen.py`` files in each directory which
+Furthermore, it requires creating ``gcgen_conf.py`` files in each directory which
 uses gcgen for code-generation. This both makes it easier to identify where
 gcgen is used, and encourages keeping snippet definitions and relevant scope
 entries local to the consuming code.
@@ -60,7 +60,7 @@ entries local to the consuming code.
 Since ``gcgen_parse_files`` is a function, you could generate the list of files:
 
 .. code-block:: python3
-    :caption: gcgen.py - parse files, parse all python files
+    :caption: gcgen_conf.py - parse files, parse all python files
     :linenos:
 
     from pathlib import Path
@@ -82,7 +82,7 @@ noting that each gcgen file may implement a function which modifies the
 of their subdirectories.
 
 .. code-block:: python3
-    :caption: gcgen.py - scope extend hook
+    :caption: gcgen_conf.py - scope extend hook
     :linenos:
 
     from gcgen.api import Scope
@@ -105,12 +105,12 @@ Each :ref:`snippet <sec-ref-snippets>` and :ref:`generator <sec-ref-generators>`
 is passed an :ref:`emitter <sec-ref-emitter>` object which is used to produce
 the generated output and to indent & dedent lines.
 
-In the ``gcgen.py`` file, you can define the characters used to indent on a
+In the ``gcgen_conf.py`` file, you can define the characters used to indent on a
 per-filetype basis:
 
 
 .. code-block:: python3
-    :caption: gcgen.py - configure indentation
+    :caption: gcgen_conf.py - configure indentation
     :linenos:
 
     from gcgen.api import Scope
@@ -124,7 +124,7 @@ per-filetype basis:
     }
 
 
-Typically, indentation would be defined in the top-level ``gcgen.py`` file, for
+Typically, indentation would be defined in the top-level ``gcgen_conf.py`` file, for
 all subdirectories to inherit.
-However, a ``gcgen.py`` in some subdirectory can implement ``gcgen_indent_by``
+However, a ``gcgen_conf.py`` in some subdirectory can implement ``gcgen_indent_by``
 to configure indentation for further file types.

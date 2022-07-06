@@ -107,35 +107,35 @@ Take the following project as an example:
 
     .
     ├── gcgen_project.ini
-    ├── gcgen.py
+    ├── gcgen_conf.py
     └── src
         ├── bar
         │   └── impl
         │       ├── file-a.py
         │       ├── file-b.py
-        │       └── gcgen.py
+        │       └── gcgen_conf.py
         ├── foo
-        │   ├── gcgen.py
+        │   ├── gcgen_conf.py
         │   └── impl
-        │       ├── gcgen.py
+        │       ├── gcgen_conf.py
         │       └── my_file.py
-        └── gcgen.py
+        └── gcgen_conf.py
 
 In this case, the scope given to any snippet executing in ``file-a.py`` would be
 built from:
 
-1. ``gcgen_scope_extend`` in ``./gcgen.py`` file (if defined)
-2. ``gcgen_scope_extend`` in ``./src/gcgen.py`` (if defined)
-3. ``gcgen_scope_extend`` in the ``src/bar/impl/gcgen.py`` file (if defined)
+1. ``gcgen_scope_extend`` in ``./gcgen_conf.py`` file (if defined)
+2. ``gcgen_scope_extend`` in ``./src/gcgen_conf.py`` (if defined)
+3. ``gcgen_scope_extend`` in the ``src/bar/impl/gcgen_conf.py`` file (if defined)
 
 
 Similarly, the scope given to any snippet executing in ``my_file.py`` would be
 built from:
 
-1. ``gcgen_scope_extend`` in ``./gcgen.py`` file (if defined)
-2. ``gcgen_scope_extend`` in ``./src/gcgen.py`` (if defined)
-3. ``gcgen_scope_extend`` in ``src/foo/gcgen.py`` (if defined)
-4. ``gcgen_scope_extend`` in ``src/foo/impl/gcgen.py`` (if defined)
+1. ``gcgen_scope_extend`` in ``./gcgen_conf.py`` file (if defined)
+2. ``gcgen_scope_extend`` in ``./src/gcgen_conf.py`` (if defined)
+3. ``gcgen_scope_extend`` in ``src/foo/gcgen_conf.py`` (if defined)
+4. ``gcgen_scope_extend`` in ``src/foo/impl/gcgen_conf.py`` (if defined)
 
 
 To see how to implement the ``gcgen_scope_extend`` function, see
