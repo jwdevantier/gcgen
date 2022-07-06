@@ -18,12 +18,15 @@ Example
 
 .. code-block:: python3
 
-    from gcgen.api import Scope, Emitter, snippet
+    from gcgen.api import Scope, Emitter, Json, snippet
 
     @snippet("my-snippet")
-    def mysnippet(e: Emitter, s: Scope):
-        f = Scope["filename"]  # assuming `filename` has been defined
-        e.emitln(f"""with open({f!r}) as fh:""")
+    def include_file_output(e: Emitter, s: Scope, v: Json):
+        if isinstance(v, str):
+            filename = v
+        else:
+            raise RuntimeError("expected filename passed as string argument")
+        e.emitln(f"""with open({filename!r}) as fh:""")
         e.indent()
         e.emitln("for lines in fh.readlines():")
         e.indent()
@@ -36,7 +39,7 @@ Given the following file:
     :caption: myfile.py
 
     def some_function():
-        # [[start my-snippet
+        # [[start include_file_output "/etc/issue"
         # end]]
 
 
@@ -46,8 +49,8 @@ The expanded output would become:
     :caption: myfile.py
 
     def some_function():
-        # [[start my-snippet
-        with open("foo.txt") as fh:
+        # [[start include_file_output "/etc/issue"
+        with open("/etc/issue") as fh:
             for lines in fh.readlines()
                 ...
         # end]]

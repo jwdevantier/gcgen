@@ -1,8 +1,8 @@
-from gcgen.api import Emitter, Scope, snippet
+from gcgen.api import Emitter, Scope, Json, snippet
 
 
 @snippet("test")
-def gen_arithmetic_ops(e: Emitter, s: Scope):
+def gen_arithmetic_ops(e: Emitter, s: Scope, val: Json):
     ops = {
         "add": "+",
         "sub": "-",

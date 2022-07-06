@@ -27,7 +27,7 @@ addition (``add``), subtraction (``sub``), division (``div``) and multiplication
         return x % y
 
 
-    # [[start common_math_funcs
+    # [[start common_math_funcs [["add", "+"], ["sub", "-"], ["div", "/"], ["mul", "*"]]
     # end]]
 
 
@@ -81,9 +81,9 @@ file, whose contents are auto-generated and will be rewritten each time gcgen
 is run.
 
 By contrast :ref:`generators <sec-ref-generators>` are functions in a gcgen
-file (see next paragraph), which is mostly useful generating files from
-scratch, where number and naming of the files is dynamic and depends on
-some input data or model.
+file (see next paragraph), which are mostly useful when generating files,
+where the number and naming of the files is dynamic and depends on some input
+data or model.
 
 Each snippet and generator are passed two objects, an
 :ref:`emitter <sec-ref-emitter>` as mentioned before, and a

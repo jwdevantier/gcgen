@@ -1,23 +1,17 @@
-from gcgen.api import Emitter, Scope, snippet
+from gcgen.api import Emitter, Scope, Json, snippet
 
 
 # Snippets are annotated `@snippet("<name>")`
 @snippet("common_math_funcs")
-def gen_arithmetic_ops(e: Emitter, s: Scope):
-    ops = {
-        "add": "+",
-        "sub": "-",
-        "div": "/",
-        "mul": "*",
-    }
+def gen_arithmetic_ops(e: Emitter, s: Scope, val: Json):
     first = True
-    for name, op in ops.items():
+    for lbl, op in val:
         if not first:
             e.newline()
             e.newline()
         else:
             first = False
-        e.emitln(f"def {name}(x, y):")
+        e.emitln(f"def {lbl}(x, y):")
         e.indent()
         e.emitln(f"return x {op} y")
         e.dedent()

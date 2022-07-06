@@ -56,8 +56,3 @@ Mix hand-written and generated code in files
 By allowing a mixture of hand-written and generated code in the same file,
 we encourage granular use of code-generation. This ideally prevents pulling
 in more and more code into templates.
-
-
-Summary
-~~~~~~~
-

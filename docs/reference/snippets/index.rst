@@ -46,6 +46,7 @@ respectively:
         fmt.Println("hello, world!")
         // [[start my-snippet
         // end]]
+    }
 
 In these two examples, ``my-snippet`` is the name of the snippet called - this
 corresponds to the snippet definition seen in :ref:`sec-ref-snippets-def`.
@@ -80,8 +81,13 @@ Additionally, for gcgen to parse the file successfully, each snippet that
 Defining a snippet
 ==================
 
-Snippets are functions taking two arguments, an 
-:ref:`emitter <sec-ref-emitter>` and a :ref:`scope <sec-ref-scope>` object.
+Snippets are functions taking three arguments:
+
+#. :ref:`emitter <sec-ref-emitter>` - this is used to generate output in the file calling the snippet
+#. a :ref:`scope <sec-ref-scope>` - this is populated both by :ref:`gcgen <sec-ref-gcgen-file>` files and preceding snippets in the same file.
+#. a ``Json`` value - snippets may receive an argument, which must be a valid Json value. The value is ``None`` if no argument was given or ``null`` was passed.
+
+
 Crucially, to be a snippet, the function must also be using the ``snippet``
 decorator - this decorator ensures gcg registers the function as a snippet, and
 defines the name to give it.
@@ -93,11 +99,11 @@ defines the name to give it.
     :emphasize-lines: 5, 6
 
     # (inside a gcgen_conf.py file)
-    from gcgen.api import Emitter, Scope, snippet
+    from gcgen.api import Emitter, Scope, Json, snippet
 
 
     @snippet("my-snippet")
-    def my_snippet(e: Emitter, s: Scope):
+    def my_snippet(e: Emitter, s: Scope, v: Json):
         pass
 
 
@@ -130,52 +136,41 @@ How to use snippets effectively
 
 Why snippets cannot take parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Snippets should not be treated as functions, but should be kept small.
-Among other things, snippets cannot take arguments - by design.
-gcgen is inspired by tools like `Cog <https://nedbatchelder.com/code/cog>`_, but
+Snippets are intentionally limited to take at *most* one JSON argument.
+Gcgen is inspired by tools like `Cog <https://nedbatchelder.com/code/cog>`_, but
 disagrees with inlining code-generation code into source files. 
 Inlining code both clutters the source file and introduces code, for which
 the user gets no ide/linting/type-checking support.
+
 If you consider that each function argument can be an arbitrarily complex
 Python expression, you will see why implementing parameter support in effect
 means allowing in-line code.
 
+However, by limiting input to Json, we allow input arguments without
+supporting in-line code. By not supporting multi-line values, we furthermore
+push complexity out into the :ref:`link <sec-ref-gcgen-file>` files, but
+allow some parametrization of snippets.
+
+Limited parametrization avoids cluttering the source file, but ensures we
+can write snippets which must collaborate in some way, e.g. by one snippet
+identifying a variable which other snippets or surrounding code can use.
+Consider ``[[ start open_file {"file": "/etc/issue", "var": "fh"}}``, this
+makes it apparent that we can pass ``fh`` to other snippets to operate on
+the opened file or reference the ``fh`` handle directly on hand-written
+code.
+
 Tip: keep snippets small!
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-Snippets cannot take parameters for the reasons described above. One way to
-work around it is to re-frame your approach to snippets: consider snippets more
-as function calls rather than functions. In essence write your generalized,
-parametrized code generation logic as functions taking parameters, and have
-snippets simply call these functions with the desired parameters.
-
-The (simplistic) example below illustrates the idea:
-
-.. code-block:: python3
-    :linenos:
-    :emphasize-lines: 4, 14, 18
-
-    from gcgen.api import snippet, Emitter, Scope
-
-    # generalized code-generation logic:
-    def binop_fn(e: Emitter, name: str, op: str):
-        e.emitln(f"def {name}(x, y):")
-        e.indent()
-        e.emitln("return x {op} y")
-        e.dedent()
-
-    # These two snippets simply call the generalized function
-    # with the specific parameters
-    @snippet("add")
-    def s_add(e: Emitter, s: Scope):
-        binop_fn(e, "add", "+")
-
-    @snippet("sub")
-    def s_sub(e: Emitter, s: Scope):
-        binop_fn(e, "sub", "-")
+If you find yourself passing large Json objects to your snippets, then you
+are keeping too much complexity at the call-site (the source file) and the
+snippet is likely too generic.
+Try to specialize your snippets and ensure that they work with limited arguments.
+Remember, a snippet argument could reference a larger, complex value already
+stored in the :ref:`sec-ref-scope`.
 
 
-Tip: file-specific scope
-~~~~~~~~~~~~~~~~~~~~~~~~
+Tip: use the file-specific scope
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Each file being parsed for snippets receives its own scope. This also means that
 changes to the scope made by one snippet are visible to every snippet called
 later in the file.
@@ -192,20 +187,23 @@ function:
 
 .. code-block:: python3
     :linenos:
-    :emphasize-lines: 12
+    :emphasize-lines: 15
 
-    from gcgen.api import snippet, Emitter, Scope
+    from gcgen.api import snippet, Emitter, Scope, Json
 
     # These two snippets simply call the generalized function
     # with the specific parameters
     @snippet("foo")
-    def s_foo(e: Emitter, s: Scope):
-        e.emitln("foo> hello!")
+    def s_foo(e: Emitter, s: Scope, v: Json):
+        if v:
+            e.emitln(f"foo> hello {v}!")
+        else:
+            e.emitln("foo> hello!")
 
     @snippet("bar")
-    def s_bar(e: Emitter, s: Scope):
+    def s_bar(e: Emitter, s: Scope, v: Json):
         e.emitln("bar> hello!")
-        s_foo(e, s)
+        s_foo(e, s, "Bar")
 
 
 However, now ``s_bar`` will *always* call ``s_foo``, even if ``foo`` is
@@ -214,20 +212,23 @@ We can instead dynamically resolve the snippet to call using ``get_snippet``:
 
 .. code-block:: python3
     :linenos:
-    :emphasize-lines: 12
+    :emphasize-lines: 15
 
-    from gcgen.api import snippet, Emitter, Scope, get_snippet
+    from gcgen.api import snippet, Emitter, Scope, Json, get_snippet
 
     # These two snippets simply call the generalized function
     # with the specific parameters
     @snippet("foo")
-    def s_foo(e: Emitter, s: Scope):
-        e.emitln("foo> hello!")
+    def s_foo(e: Emitter, s: Scope, v: Json):
+        if v:
+            e.emitln(f"foo> hello {v}!")
+        else:
+            e.emitln("foo> hello!")
 
     @snippet("bar")
-    def s_bar(e: Emitter, s: Scope):
+    def s_bar(e: Emitter, s: Scope, v: Json):
         e.emitln("bar> hello!")
-        get_snippet(s, "foo")(e, s)
+        get_snippet(s, "foo", "Bar")(e, s)
 
 
 Using ``get_snippet``, we thus call whatever the ``foo`` snippet is in the
