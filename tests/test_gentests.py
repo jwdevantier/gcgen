@@ -154,13 +154,13 @@ def test_bb_snippets_calling_snippets():
     )
 
 
-def test_bb_snippets_unclosed_snippet_err():
+def test_bb_snippets_err_nested_snippets():
     with load_gentest("bb-snippets-err-nested-snippets") as gtc:
         with pytest.raises(NestedSnippetsError):
             generate.compile(gtc.input_path)
 
 
-def test_bb_snippets_unclosed_snippet_err():
+def test_bb_snippets_err_unclosed_snippet():
     with load_gentest("bb-snippets-err-unclosed-snippet") as gtc:
         with pytest.raises(UnclosedSnippetError):
             generate.compile(gtc.input_path)
