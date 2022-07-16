@@ -69,7 +69,14 @@ class NestedSnippetsError(SnippetParseError):
 
 
 class SnippetJsonValueError(SnippetParseError):
-    def __init__(self, file: Path, snippet: str, value: str, json_err: JSONDecodeError, line_start: int):
+    def __init__(
+        self,
+        file: Path,
+        snippet: str,
+        value: str,
+        json_err: JSONDecodeError,
+        line_start: int,
+    ):
         self.file = file
         self.snippet = snippet
         self.line_start = line_start
@@ -81,15 +88,13 @@ class SnippetJsonValueError(SnippetParseError):
             file,
             snippet,
             line_start,
-            line_start
+            line_start,
         )
 
     def printerr(self) -> None:
         print("Snippet argument parse error:")
         print("")
-        print(
-            "Error parsing argument as JSON value"
-        )
+        print("Error parsing argument as JSON value")
         print("")
         print("Details:")
         print(f"  File: {self.file}")
@@ -105,7 +110,12 @@ class ParserBase:
         self.snippet_end = snippet_end
 
     def on_snippet(
-        self, snippet_prefix: str, snippet_name: str, snippet_arg: Json, src_path: Path, fh: TextIOWrapper
+        self,
+        snippet_prefix: str,
+        snippet_name: str,
+        snippet_arg: Json,
+        src_path: Path,
+        fh: TextIOWrapper,
     ):
         pass
 
@@ -133,7 +143,9 @@ class ParserBase:
                         if ndx != -1:
                             cont = True
                             prefix = line[0:ndx]
-                            parts = line[ndx + len(snippet_start):].strip().split(" ", 1)
+                            parts = (
+                                line[ndx + len(snippet_start) :].strip().split(" ", 1)
+                            )
                             if len(parts) == 1:
                                 snippet_name = parts[0]
                                 snippet_arg = None
@@ -148,7 +160,11 @@ class ParserBase:
                                         snippet_arg = json.loads(snippet_arg)
                                     except JSONDecodeError as e:
                                         raise SnippetJsonValueError(
-                                            fpath, snippet_name, snippet_arg_raw, e, lineno
+                                            fpath,
+                                            snippet_name,
+                                            snippet_arg_raw,
+                                            e,
+                                            lineno,
                                         ) from e
                             break
 
@@ -174,7 +190,9 @@ class ParserBase:
                     for line in src:
                         lineno += 1
                         if line.startswith(s_end):
-                            self.on_snippet(snippet_prefix, snippet_name, snippet_arg, fpath, dst)
+                            self.on_snippet(
+                                snippet_prefix, snippet_name, snippet_arg, fpath, dst
+                            )
                             dst.write(line)  # retain the snippet end line
                             cont = True
                             break

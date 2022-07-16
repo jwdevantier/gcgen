@@ -42,13 +42,16 @@ class CapturingParser(snippetparser.ParserBase):
         super().parse(fpath, dpath)
 
     def on_snippet(
-        self, snippet_prefix: str, snippet_name: str, snippet_arg: snippetparser.Json, src_path: Path, fh: TextIOWrapper
+        self,
+        snippet_prefix: str,
+        snippet_name: str,
+        snippet_arg: snippetparser.Json,
+        src_path: Path,
+        fh: TextIOWrapper,
     ):
-        self._results.append(SnippetResult(
-            name=snippet_name,
-            prefix=snippet_prefix,
-            args=snippet_arg
-        ))
+        self._results.append(
+            SnippetResult(name=snippet_name, prefix=snippet_prefix, args=snippet_arg)
+        )
         # pass
 
 
@@ -70,7 +73,7 @@ def test_prog_w_noarg_snippets():
         parser.parse(fpath, fpath)
         assert parser._results == [
             SnippetResult(name="hello", prefix="", args=None),
-            SnippetResult(name="smth", prefix="    ", args=None)
+            SnippetResult(name="smth", prefix="    ", args=None),
         ]
 
 
@@ -105,5 +108,9 @@ def test_prog_w_json_args():
             SnippetResult(name="hello", prefix="", args=None),
             SnippetResult(name="hello", prefix="", args="Jacque"),
             SnippetResult(name="print_files", prefix="    ", args=["file1", "file2"]),
-            SnippetResult(name="mk_user", prefix="    ", args={"username": "jane", "groups": ["wheel", "docker"]}),
+            SnippetResult(
+                name="mk_user",
+                prefix="    ",
+                args={"username": "jane", "groups": ["wheel", "docker"]},
+            ),
         ]

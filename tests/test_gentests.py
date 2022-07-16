@@ -6,7 +6,11 @@ import hashlib
 from setuptools._distutils.dir_util import copy_tree
 from typing import Dict, List
 from gcgen import generate
-from gcgen.snippetparser import UnclosedSnippetError, NestedSnippetsError, SnippetJsonValueError
+from gcgen.snippetparser import (
+    UnclosedSnippetError,
+    NestedSnippetsError,
+    SnippetJsonValueError,
+)
 import pytest
 import logging
 
@@ -155,9 +159,7 @@ def test_bb_snippets_calling_snippets():
 
 
 def test_bb_snippets_json_args():
-    gentest_test_eql(
-        "bb-snippets-json-args", ["example.txt"]
-    )
+    gentest_test_eql("bb-snippets-json-args", ["example.txt"])
 
 
 def test_bb_snippets_json_args_err():

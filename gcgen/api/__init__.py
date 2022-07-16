@@ -14,5 +14,5 @@ __all__ = [
     "generator",
     "get_snippet",
     "write_file",
-    "Json"
+    "Json",
 ]

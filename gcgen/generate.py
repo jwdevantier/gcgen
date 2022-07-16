@@ -106,7 +106,12 @@ class Parser(ParserBase):
         self._scope = scope
 
     def on_snippet(
-        self, snippet_prefix: str, snippet_name: str, snippet_arg: Json, src_path: Path, fh: TextIOWrapper
+        self,
+        snippet_prefix: str,
+        snippet_name: str,
+        snippet_arg: Json,
+        src_path: Path,
+        fh: TextIOWrapper,
     ):
         logger.debug(f"on_snippet {snippet_name!r} called")
         snippet_fn: Union[SnippetFn, None] = self._snippets_scope.get(
