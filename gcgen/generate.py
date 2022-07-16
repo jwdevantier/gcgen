@@ -130,6 +130,7 @@ class Parser(ParserBase):
         scope["$snippets"] = self._snippets_scope.derive()
         try:
             snippet_fn(emitter, scope, snippet_arg)
+            emitter.freshline()
         except Exception as e:
             logger.error(
                 f"error executing snippet {snippet_name!r} in {fpath!s}", exc_info=True

@@ -180,6 +180,19 @@ def test_bb_snippets_err_unclosed_snippet():
             generate.compile(gtc.input_path)
 
 
+def test_bb_snippets_always_end_last_line():
+    """encountered bug where a snippet which did not end on a fresh (empty)
+    line would cause the snippet end tag to be written on that line, causing
+    the next parse to fail because the corresponding snippet close tag was
+    not picked up.
+
+    This test is to ensure that we now always end on a fresh line, even if the
+    snippet last called `emit` rather than `emitln`."""
+    with load_gentest("bb-snippets-always-end-last-line") as gtc:
+        generate.compile(gtc.input_path)
+        generate.compile(gtc.input_path)
+
+
 def test_cc_generators_write_test():
     "write two files using a generator"
     gentest_test_eql("cc-generators-write-test", ["foo.txt", "bar.txt"])

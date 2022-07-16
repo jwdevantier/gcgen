@@ -1,0 +1,7 @@
+
+something
+# <<? foo
+# ?>>
+something else..
+# <<? bar
+# ?>>
