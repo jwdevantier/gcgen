@@ -110,13 +110,7 @@ def main():
         logger.debug(f"Tag end: `{tag_end}`")
 
     # ensure python code in the top-level directory of the project can be imported for use in snippets & generators
-    mod_root = project_root / "gcgen_modules"
-    if mod_root.exists() and mod_root.is_dir():
-        sys.path.insert(1, str(mod_root.resolve()))
-    else:
-        logger.info(
-            f"`gcgen_modules` missing, Python modules placed in this directory can be included from snippets and configuration files"
-        )
+    sys.path.insert(1, str(project_root.resolve()))
 
     gen.compile(project_root, tag_start=tag_start, tag_end=tag_end)
 
