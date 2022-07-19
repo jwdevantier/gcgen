@@ -35,8 +35,10 @@ class Emitter:
         """indent line iff. currently at the beginning of a new line"""
         if not self._beginning_of_line:
             return
-        self._buf.append(self._prefix)
-        self._buf.append(self._indent_by * self._indent_level)
+        if self._prefix:
+            self._buf.append(self._prefix)
+        if self._indent_level != 0:
+            self._buf.append(self._indent_by * self._indent_level)
         self._beginning_of_line = False
 
     def newline(self) -> None:
