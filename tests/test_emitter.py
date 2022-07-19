@@ -105,3 +105,24 @@ def test_dedent_guard():
     e.dedent()
     with pytest.raises(EmitterDedentError):
         e.dedent()
+
+
+@pytest.mark.parametrize("n", [0, 1, 2, 3, 4])
+def test_newlines(n):
+    e = Emitter("")
+    assert e._buf[-n:] == []
+    e.ensure_newlines(n)
+    assert e._buf[-n:] == ["\n" for _ in range(0, n)]
+
+
+@pytest.mark.parametrize("n", [0, 1, 2, 3, 4])
+def test_newlines2(n):
+    e = Emitter("")
+    assert e._buf[-n:] == []
+    e.emitln("hello, world")
+    e.ensure_newlines(n)
+    # Note that an additional "\n" (newline) entry is tolerated
+    # this is the element which terminates the preceding line.
+    expected = ["hello, world", "\n"]
+    expected.extend("\n" for _ in range(0, n))
+    assert e._buf == expected

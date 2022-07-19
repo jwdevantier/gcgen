@@ -152,3 +152,17 @@ class Emitter:
         """Return iterator of each element in buffer."""
         for elem in self._buf:
             yield str(elem)
+
+    def ensure_newlines(self, n: int):
+        """Ensure (at least) `n` empty lines."""
+        # if empty, n newlines suffice
+        # if some line BEFORE, then n+1 newlines needed
+        buf_end = self._buf[-(n + 1):]
+        buf_end.reverse()
+        num_newlines = 0
+        for e in buf_end:
+            if e != "\n":
+                n += 1
+                break
+            num_newlines += 1
+        self._buf.extend("\n" for _ in range(0, n - num_newlines))
