@@ -108,11 +108,14 @@ def test_dedent_guard():
 
 
 @pytest.mark.parametrize("n", [0, 1, 2, 3, 4])
-def test_newlines(n):
+def test_newlines_empty_is_noop(n):
+    """
+    When calling with an empty buffer, do not add any newlines.
+    """
     e = Emitter("")
     assert e._buf[-n:] == []
-    e.ensure_newlines(n)
-    assert e._buf[-n:] == ["\n" for _ in range(0, n)]
+    e.ensure_padding_lines(n)
+    assert e._buf[-n:] == []
 
 
 @pytest.mark.parametrize("n", [0, 1, 2, 3, 4])
@@ -120,7 +123,7 @@ def test_newlines2(n):
     e = Emitter("")
     assert e._buf[-n:] == []
     e.emitln("hello, world")
-    e.ensure_newlines(n)
+    e.ensure_padding_lines(n)
     # Note that an additional "\n" (newline) entry is tolerated
     # this is the element which terminates the preceding line.
     expected = ["hello, world", "\n"]
