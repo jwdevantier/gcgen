@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>The code emitter &#8212; gcgen  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="gcgen API" href="../api/index.html" />
+    <link rel="prev" title="Generators" href="../generators/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="the-code-emitter">
+<span id="sec-ref-emitter"></span><h1>The code emitter<a class="headerlink" href="#the-code-emitter" title="Permalink to this heading">¶</a></h1>
+<p>All <a class="reference internal" href="../snippets/index.html#sec-ref-snippets"><span class="std std-ref">snippets</span></a> and <a class="reference internal" href="../generators/index.html#sec-ref-generators"><span class="std std-ref">generators</span></a>
+are provided an emitter, which they must use to generate their output.</p>
+<p>The emitter provides a convenient if simple abstraction for output generation.
+The main objective of the API is to control lines and indentation.
+This permits gcgen to ensure that output generated from a snippet is always
+properly indented, such that each line of the snippet are indented relative
+to the indentation of the snippet start line.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gcgen.api</span> <span class="kn">import</span> <span class="n">Scope</span><span class="p">,</span> <span class="n">Emitter</span><span class="p">,</span> <span class="n">Json</span><span class="p">,</span> <span class="n">snippet</span>
+
+<span class="nd">@snippet</span><span class="p">(</span><span class="s2">&quot;my-snippet&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">include_file_output</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="n">Emitter</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="n">Scope</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Json</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;expected filename passed as string argument&quot;</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">emitln</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;with open(</span><span class="si">{</span><span class="n">filename</span><span class="si">!r}</span><span class="s2">) as fh:&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">indent</span><span class="p">()</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">emitln</span><span class="p">(</span><span class="s2">&quot;for lines in fh.readlines():&quot;</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">indent</span><span class="p">()</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">emitln</span><span class="p">(</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Given the following file:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">myfile.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">some_function</span><span class="p">():</span>
+    <span class="c1"># &lt;&lt;? include_file_output &quot;/etc/issue&quot;</span>
+    <span class="c1"># ?&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
+<p>The expanded output would become:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">myfile.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">some_function</span><span class="p">():</span>
+    <span class="c1"># &lt;&lt;? include_file_output &quot;/etc/issue&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/etc/issue&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">lines</span> <span class="ow">in</span> <span class="n">fh</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="o">...</span>
+    <span class="c1"># ?&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Note</strong>: While the emitter controls the level of indentation, the characters
+used to indent the line is actually determined by
+<a class="reference internal" href="../gcgen_file/index.html#sec-ref-conf-indent-by"><span class="std std-ref">gcgen_indent_by</span></a>, which can be used to define
+how indentation should be handled on a file-type basis.</p>
+</section>
+<section id="emitter-api">
+<h2>Emitter API<a class="headerlink" href="#emitter-api" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">Emitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Helper to emit text and control indentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prefix</strong> – base prefix of each line, this will correspond to the level
+of indentation of the snippet start line or the parent emitter.</p></li>
+<li><p><strong>indent_by</strong> – the sequence of characters to use for each level of
+indentation. E.g. could be 4 spaces for Python files or one
+tab character for Go files.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../api/index.html#gcgen.api.Emitter" title="gcgen.emitter.Emitter"><span class="pre">Emitter</span></a></span></span></dt>
+<dd><p>Add section to be filled in later.</p>
+<p>Returns a new emitter object, whose contents will form the part
+of the final output between the prior line of this emitter
+(if any) and any subsequently added lines.</p>
+<p>Note: this function will cause a newline if the current line has any
+contents already written to it (using <cite>emit</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new emitter object whose contents will be injected into the
+final output at this point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">dedent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Dedent lines by one.</p>
+<p>Causes all future lines to be indented one level less.</p>
+<p>Note: this function will cause a newline if the current line has any
+contents already written to it (using <cite>emit</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>emit one or more strings to the output.</p>
+<p>Emit one or more strings. If multiple strings are provided, they
+will be concatenated without any space or separation.</p>
+<p><em>Note</em>: in most cases, using <cite>emitln</cite> with an f-string is a better
+idea.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*s</strong> – one or more strings, which will be concatenated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emitln</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Emit a new line to the output.</p>
+<p>Writes a full line of output, taking care to properly indent the line
+as defined by the <cite>indent_by</cite> attribute and current level of
+indentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*s</strong> – one or more strings, each becoming a separate line of output.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emitln_l</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Emit line, then dedent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emitln_r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Emit line, then indent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ensure_padding_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Ensure (at least) <cite>n</cite> empty lines of padding between two sections</p>
+<p>NOTE: if the buffer is empty, this call is a NO-OP.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">freshline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>emit newline iff not currently at the beginning of a new line</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">indent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Indent subsequent lines.</p>
+<p>Causes all future lines to be indented one level more.</p>
+<p>Note: this function will cause a newline if the current line has any
+contents already written to it (using <cite>emit</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">lines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Return iterator of each element in buffer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">newline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>add a newline</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">gcgen</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jwdevantier&repo=gcgen&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing_gcgen/index.html">Installing gcgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../starting_a_project/index.html">Starting a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gcgen_file/index.html">gcgen file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scope/index.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snippets/index.html">Snippets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generators/index.html">Generators</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The code emitter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#emitter-api">Emitter API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">gcgen API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../generators/index.html" title="previous chapter">Generators</a></li>
+      <li>Next: <a href="../api/index.html" title="next chapter">gcgen API</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Jesper Devantier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/reference/emitter/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
