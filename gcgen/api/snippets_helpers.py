@@ -1,10 +1,11 @@
 from gcgen.scope import Scope
-from gcgen.emitter import Emitter
+from gcgen.decorators import is_snippet
+from gcgen.emitter import Section
 from gcgen.api.types import Json
 from typing import Callable
 
 
-SnippetFn = Callable[[Emitter, Scope, Json], None]
+SnippetFn = Callable[[Section, Scope, Json], None]
 
 
 unset = object()
@@ -25,4 +26,8 @@ def get_snippet(scope: Scope, snippet: str, default=unset) -> SnippetFn:
     snippet = scope["$snippets"].get(snippet, default=default)
     if snippet is unset:
         raise KeyError(snippet)
+    elif not callable(snippet):
+        raise RuntimeError(f"expected callable, got {type(snippet)} / {repr(snippet)}")
+    elif not is_snippet(snippet):
+        raise RuntimeError("callable is not marked as a snippet")
     return snippet

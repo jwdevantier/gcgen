@@ -1,12 +1,12 @@
 import tempfile
 from os import rename as os_rename
 from pathlib import Path
-from gcgen.emitter import Emitter
+from gcgen.emitter import Emitter, Section
 from typing import Union
 
 
 class write_file(object):
-    """Context manager to safely write a file using an Emitter.
+    """Context manager to safely write a file using an Section.
 
     If the context manager finishes successfully, then the file identified by
     `fpath` is replaced atomically by the temporary file which contains the
@@ -27,12 +27,13 @@ class write_file(object):
         self._fpath = fpath if isinstance(fpath, Path) else Path(fpath)
         self._indent_by = indent_by
 
-    def __enter__(self) -> Emitter:
+    def __enter__(self) -> Section:
         self._fh = tempfile.NamedTemporaryFile(
             "w", dir=self._fpath.parent, delete=False
         )
         self._emitter = Emitter(prefix="", indent_by=self._indent_by)
-        return self._emitter
+        self._section = Section()
+        return self._section
 
     def __exit__(self, exc_type, _, __):
         if exc_type:
@@ -43,8 +44,7 @@ class write_file(object):
             return
 
         try:
-            for line in self._emitter.lines():
-                self._fh.write(line)
+            self._emitter.emit(self._section, self._fh)
             self._fh.close()
             os_rename(src=self._fh.name, dst=self._fpath)
         except Exception as e:

@@ -102,7 +102,7 @@ Configure indentation
 .. _sec-ref-conf-indent-by:
 
 Each :ref:`snippet <sec-ref-snippets>` and :ref:`generator <sec-ref-generators>`
-is passed an :ref:`emitter <sec-ref-emitter>` object which is used to produce
+is passed an :ref:`section <sec-ref-section>` object which is used to produce
 the generated output and to indent & dedent lines.
 
 In the ``gcgen_conf.py`` file, you can define the characters used to indent on a

@@ -73,7 +73,7 @@ A high-level introduction to gcg
 Snippets & Generators
 ~~~~~~~~~~~~~~~~~~~~~
 gcg supports two forms of code generation, snippets and generators, both
-generate code using a :ref:`Emitter <sec-ref-emitter>`, which provides a
+generate code using a :ref:`section <sec-ref-section>`, which provides a
 convenient API for writing output, lines and handling indentation.
 
 :ref:`Snippets <sec-ref-snippets>`, as shown above, mark regions within a
@@ -85,8 +85,8 @@ file (see next paragraph), which are mostly useful when generating files,
 where the number and naming of the files is dynamic and depends on some input
 data or model.
 
-Each snippet and generator are passed two objects, an
-:ref:`emitter <sec-ref-emitter>` as mentioned before, and a
+Each snippet and generator are passed two objects, a
+:ref:`section <sec-ref-section>` as mentioned before, and a
 :ref:`scope <sec-ref-scope>`.
 
 Scope

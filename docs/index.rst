@@ -29,7 +29,7 @@ Contents
    reference/scope/index.rst
    reference/snippets/index.rst
    reference/generators/index.rst
-   reference/emitter/index.rst
+   reference/section/index.rst
    reference/api/index.rst
 
 

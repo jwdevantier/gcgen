@@ -1,4 +1,4 @@
-from gcgen.api import Emitter, Scope, snippet, Json
+from gcgen.api import Section, Scope, snippet, Json
 from typing import List
 
 
@@ -13,15 +13,15 @@ def gcgen_scope_extend(s: Scope):
 
 
 @snippet("foo")
-def s_foo(e: Emitter, s: Scope, val: Json):
-    e.emitln("foo from outer ctx!")
-    e.emitln(f"""scope["some-var"]: {s["some-var"]}""")
-    e.emitln("/outer foo end")
+def s_foo(s: Section, scope: Scope, _: Json):
+    s.emitln("foo from outer ctx!")
+    s.emitln(f"""scope["some-var"]: {scope["some-var"]}""")
+    s.emitln("/outer foo end")
 
 
 @snippet("bar")
-def name_does_not_matter(e: Emitter, s: Scope, val: Json):
-    e.emitln("bar from outer ctx!")
+def name_does_not_matter(s: Section, _: Scope, __: Json):
+    s.emitln("bar from outer ctx!")
 
 
 def gcgen_parse_files() -> List[str]:

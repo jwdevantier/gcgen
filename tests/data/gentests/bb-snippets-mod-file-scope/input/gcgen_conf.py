@@ -1,5 +1,5 @@
 from typing import List
-from gcgen.api import snippet, Emitter, Scope, Json
+from gcgen.api import snippet, Section, Scope, Json
 
 
 def gcgen_scope_extend(scope: Scope):
@@ -7,13 +7,13 @@ def gcgen_scope_extend(scope: Scope):
 
 
 @snippet("modify-scope")
-def _env(e: Emitter, s: Scope, val: Json):
-    s["name"] = "Jane Doe"
+def _env(_: Section, scope: Scope, __: Json):
+    scope["name"] = "Jane Doe"
 
 
 @snippet("greet")
-def _greet(e: Emitter, s: Scope, val: Json):
-    e.emitln(f"""Hello, {s["name"]}!""")
+def _greet(s: Section, scope: Scope, _: Json):
+    s.emitln(f"""Hello, {scope["name"]}!""")
 
 
 def gcgen_parse_files() -> List[str]:

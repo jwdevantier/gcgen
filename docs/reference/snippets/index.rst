@@ -83,7 +83,7 @@ Defining a snippet
 
 Snippets are functions taking three arguments:
 
-#. :ref:`emitter <sec-ref-emitter>` - this is used to generate output in the file calling the snippet
+#. :ref:`section <sec-ref-section>` - this is used to generate output in the file calling the snippet
 #. a :ref:`scope <sec-ref-scope>` - this is populated both by :ref:`gcgen <sec-ref-gcgen-file>` files and preceding snippets in the same file.
 #. a ``Json`` value - snippets may receive an argument, which must be a valid Json value. The value is ``None`` if no argument was given or ``null`` was passed.
 
@@ -99,11 +99,11 @@ defines the name to give it.
     :emphasize-lines: 5, 6
 
     # (inside a gcgen_conf.py file)
-    from gcgen.api import Emitter, Scope, Json, snippet
+    from gcgen.api import Section, Scope, Json, snippet
 
 
     @snippet("my-snippet")
-    def my_snippet(e: Emitter, s: Scope, v: Json):
+    def my_snippet(sec: Section, s: Scope, v: Json):
         pass
 
 
@@ -134,30 +134,23 @@ How to use snippets effectively
 
 .. _sec-ref-snippets-params:
 
-Why snippets cannot take parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Why can snippets only take one parameter?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Snippets are intentionally limited to take at *most* one JSON argument.
 Gcgen is inspired by tools like `Cog <https://nedbatchelder.com/code/cog>`_, but
 disagrees with inlining code-generation code into source files. 
 Inlining code both clutters the source file and introduces code, for which
 the user gets no ide/linting/type-checking support.
 
-If you consider that each function argument can be an arbitrarily complex
-Python expression, you will see why implementing parameter support in effect
-means allowing in-line code.
+By limiting input to a single JSON value, we allow input arguments without
+supporting inline code. By limiting arguments to the snippet opening line,
+we further push code-generation logic out of the source file and into the
+:ref:`gcgen-file <sec-ref-gcgen-file>`.
 
-However, by limiting input to Json, we allow input arguments without
-supporting in-line code. By not supporting multi-line values, we furthermore
-push complexity out into the :ref:`link <sec-ref-gcgen-file>` files, but
-allow some parametrization of snippets.
-
-Limited parametrization avoids cluttering the source file, but ensures we
-can write snippets which must collaborate in some way, e.g. by one snippet
-identifying a variable which other snippets or surrounding code can use.
-Consider ``[[ start open_file {"file": "/etc/issue", "var": "fh"}}``, this
-makes it apparent that we can pass ``fh`` to other snippets to operate on
-the opened file or reference the ``fh`` handle directly on hand-written
-code.
+In practice, most parametrization needs are simple enough that a short
+JSON value will suffice, if not, consider writing multiple snippets which
+calls out to other functions for the common logic.
+In practice, most snippets can be sufficiently parametrized 
 
 Tip: keep snippets small!
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,21 +182,21 @@ function:
     :linenos:
     :emphasize-lines: 15
 
-    from gcgen.api import snippet, Emitter, Scope, Json
+    from gcgen.api import snippet, Section, Scope, Json
 
     # These two snippets simply call the generalized function
     # with the specific parameters
     @snippet("foo")
-    def s_foo(e: Emitter, s: Scope, v: Json):
+    def s_foo(sec: Section, s: Scope, v: Json):
         if v:
-            e.emitln(f"foo> hello {v}!")
+            sec.emitln(f"foo> hello {v}!")
         else:
-            e.emitln("foo> hello!")
+            sec.emitln("foo> hello!")
 
     @snippet("bar")
-    def s_bar(e: Emitter, s: Scope, v: Json):
-        e.emitln("bar> hello!")
-        s_foo(e, s, "Bar")
+    def s_bar(sec: Section, s: Scope, v: Json):
+        sec.emitln("bar> hello!")
+        s_foo(sec, s, "Bar")
 
 
 However, now ``s_bar`` will *always* call ``s_foo``, even if ``foo`` is
@@ -214,21 +207,21 @@ We can instead dynamically resolve the snippet to call using ``get_snippet``:
     :linenos:
     :emphasize-lines: 15
 
-    from gcgen.api import snippet, Emitter, Scope, Json, get_snippet
+    from gcgen.api import snippet, Section, Scope, Json, get_snippet
 
     # These two snippets simply call the generalized function
     # with the specific parameters
     @snippet("foo")
-    def s_foo(e: Emitter, s: Scope, v: Json):
+    def s_foo(sec: Section, s: Scope, v: Json):
         if v:
-            e.emitln(f"foo> hello {v}!")
+            sec.emitln(f"foo> hello {v}!")
         else:
-            e.emitln("foo> hello!")
+            sec.emitln("foo> hello!")
 
     @snippet("bar")
-    def s_bar(e: Emitter, s: Scope, v: Json):
-        e.emitln("bar> hello!")
-        get_snippet(s, "foo", "Bar")(e, s)
+    def s_bar(sec: Section, s: Scope, v: Json):
+        sec.emitln("bar> hello!")
+        get_snippet(s, "foo", "Bar")(sec, s)
 
 
 Using ``get_snippet``, we thus call whatever the ``foo`` snippet is in the

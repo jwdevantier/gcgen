@@ -141,6 +141,9 @@ def test_bb_snippets_calling_snippets():
         "bb-snippets-calling-snippets", ["outerfile.txt", "inner/innerfile.txt"]
     )
 
+def test_bb_snippets_empty():
+    gentest_test_eql("bb-snippets-empty", ["test.txt"])
+
 
 def test_bb_snippets_json_args():
     gentest_test_eql("bb-snippets-json-args", ["example.txt"])

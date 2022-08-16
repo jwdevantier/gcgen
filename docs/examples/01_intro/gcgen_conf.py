@@ -1,20 +1,20 @@
-from gcgen.api import Emitter, Scope, Json, snippet
+from gcgen.api import Section, Scope, Json, snippet
 
 
 # Snippets are annotated `@snippet("<name>")`
 @snippet("common_math_funcs")
-def gen_arithmetic_ops(e: Emitter, s: Scope, val: Json):
+def gen_arithmetic_ops(sec: Section, s: Scope, val: Json):
     first = True
     for lbl, op in val:
         if not first:
-            e.newline()
-            e.newline()
+            sec.newline()
+            sec.newline()
         else:
             first = False
-        e.emitln(f"def {lbl}(x, y):")
-        e.indent()
-        e.emitln(f"return x {op} y")
-        e.dedent()
+        sec.emitln(f"def {lbl}(x, y):")
+        sec.indent()
+        sec.emitln(f"return x {op} y")
+        sec.dedent()
 
 
 def gcgen_parse_files():

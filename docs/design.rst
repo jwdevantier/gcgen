@@ -13,7 +13,7 @@ This project does not try to radically redefine code-generation or
 introduce a novel hybrid template/code DSL.
 Instead it uses plain Python, introducing only the concept of a
 snippet, a region of code within a source file, whose contents is
-managed by a corresponding Python function which uses a simple emitter
+managed by a corresponding Python function which uses a simple section
 class to write plain lines of text and manage indentation.
 
 It's very tempting to think a problem requires a new (bad) DSL, and

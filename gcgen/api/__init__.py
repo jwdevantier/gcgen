@@ -1,5 +1,5 @@
 from gcgen.scope import Scope
-from gcgen.emitter import Emitter
+from gcgen.emitter import Section
 from gcgen.decorators import snippet, generator
 from gcgen.api.snippets_helpers import get_snippet, SnippetFn
 from gcgen.api.write_file import write_file
@@ -10,7 +10,7 @@ from gcgen.api.tree import *
 __all__ = [
     "Scope",
     "SnippetFn",
-    "Emitter",
+    "Section",
     "snippet",
     "generator",
     "get_snippet",

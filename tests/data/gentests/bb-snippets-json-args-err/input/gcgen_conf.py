@@ -1,13 +1,13 @@
-from gcgen.api import Emitter, Scope, Json, snippet, get_snippet
+from gcgen.api import Section, Scope, Json, snippet
 from typing import List
 
 
 @snippet("hello")
-def __hello(e: Emitter, s: Scope, val: Json):
+def __hello(s: Section, _: Scope, val: Json):
     if val is None:
-        e.emitln("hello stranger...")
+        s.emitln("hello stranger...")
     else:
-        e.emitln(f"hello {val}!")
+        s.emitln(f"hello {val}!")
 
 
 def gcgen_parse_files() -> List[str]:

@@ -16,7 +16,7 @@ from io import TextIOWrapper
 from gcgen.scope import Scope
 from gcgen import decorators
 from gcgen.snippetparser import ParserBase, Json
-from gcgen.emitter import Emitter
+from gcgen.emitter import Emitter, Section
 from gcgen.log import get_logger, LogLevel
 from gcgen.api.snippets_helpers import SnippetFn
 from gcgen.excbase import GcgenError
@@ -35,12 +35,12 @@ class SnippetRunError(SnippetException):
         snippet_name: str,
         snippet: SnippetFn,
         fpath: Path,
-        emitter: Emitter,
+        section: Section,
         scope: Scope,
     ):
         self.snippet_name = snippet_name
         self.snippet = snippet
-        self.emitter = emitter
+        self.section = section
         self.scope = scope
         self.fpath = fpath
         super().__init__(f"exception in snippet {snippet_name!r} called from {fpath!s}")
@@ -124,23 +124,24 @@ class Parser(ParserBase):
 
         indent_by = self._indent_by.get(src_path.suffix[1:]) or self._indent_by[""]
         emitter = Emitter(indent_by=indent_by, prefix=snippet_prefix)
+        section = Section()
         scope = self._scope  # do not derive, share
         scope["$snippet"] = snippet_name
         scope["$file"] = fpath
         scope["$snippets"] = self._snippets_scope.derive()
         try:
-            snippet_fn(emitter, scope, snippet_arg)
-            emitter.freshline()
+            snippet_fn(section, scope, snippet_arg)
+            section.freshline()
         except Exception as e:
             logger.error(
                 f"error executing snippet {snippet_name!r} in {fpath!s}", exc_info=True
             )
             raise SnippetRunError(
-                snippet_name, snippet_fn, src_path, emitter, scope
+                snippet_name, snippet_fn, src_path, section, scope
             ) from e
-        logger.debug(list(emitter.lines()))
-        for line in emitter.lines():
-            fh.write(line)
+        logger.debug(str(section))
+        # TODO: coerce types
+        emitter.emit(section, fh)
 
 
 class ProjectRootNotFoundError(GcgenError):
@@ -360,15 +361,20 @@ def find_project_root(start: Path) -> Path:
     raise ProjectRootNotFoundError(start)
 
 
-def import_from_path(root: Path, modpath: Path):
+def fmt_module_name(root: Path, modpath: Path) -> str:
     modname = modpath.relative_to(root)
     modname = modname.parent / modname.name[: -len(modname.suffix)]
-    modname = ".".join(e.replace(" ", "_") for e in modname.parts)
+    return ".".join(e.replace(" ", "_") for e in modname.parts)
+
+
+def import_from_path(root: Path, modpath: Path):
+    modname = fmt_module_name(root, modpath)
     spec = importlib.util.spec_from_file_location(modname, modpath)
     if spec is None:
         raise RuntimeError("spec not loaded, should be impossible")
     mod = importlib.util.module_from_spec(spec)
     sys.modules[modname] = mod
+    assert spec.loader is not None
     spec.loader.exec_module(mod)
     return mod
 

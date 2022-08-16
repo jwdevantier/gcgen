@@ -1,8 +1,8 @@
-from gcgen.api import Emitter, Scope, Json, snippet
+from gcgen.api import Section, Scope, Json, snippet
 
 
 @snippet("test")
-def gen_arithmetic_ops(e: Emitter, s: Scope, val: Json):
+def gen_arithmetic_ops(sec: Section, s: Scope, val: Json):
     ops = {
         "add": "+",
         "sub": "-",
@@ -10,12 +10,12 @@ def gen_arithmetic_ops(e: Emitter, s: Scope, val: Json):
         "mul": "*",
     }
     for name, op in ops.items():
-        e.emitln(f"def {name}(x, y):")
-        e.indent()
-        e.emitln(f"return x {op} y")
-        e.dedent()
-        e.newline()
-        e.newline()
+        sec.emitln(f"def {name}(x, y):")
+        sec.indent()
+        sec.emitln(f"return x {op} y")
+        sec.dedent()
+        sec.newline()
+        sec.newline()
 
 
 def gcgen_parse_files():

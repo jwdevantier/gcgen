@@ -7,6 +7,7 @@ from gcgen.excbase import GcgenError
 from gcgen.api.types import Json
 import json
 from json.decoder import JSONDecodeError
+from typing import Optional
 
 
 logger = get_logger(__name__)
@@ -122,6 +123,7 @@ class ParserBase:
     def parse(self, fpath: Path, dpath: Path):
         snippet_start = self.snippet_start
         snippet_end = self.snippet_end
+        dst: Optional[TextIOWrapper]
 
         if fpath == dpath:
             dst = open(Path(str(dpath) + ".gcgen.tmp"), mode="w")

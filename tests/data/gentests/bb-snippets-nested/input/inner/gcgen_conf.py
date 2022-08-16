@@ -1,4 +1,4 @@
-from gcgen.api import Emitter, Scope, snippet, Json
+from gcgen.api import Section, Scope, snippet, Json
 from typing import List
 
 
@@ -12,9 +12,9 @@ def gcgen_scope_extend(s: Scope):
 
 
 @snippet("bar")
-def name_does_not_matter(e: Emitter, s: Scope, val: Json):
-    e.emitln("bar from inner ctx!")
-    e.emitln(f"""scope["other-val"]: {s["other-val"]}""")
+def name_does_not_matter(s: Section, scope: Scope, _: Json):
+    s.emitln("bar from inner ctx!")
+    s.emitln(f"""scope["other-val"]: {scope["other-val"]}""")
 
 
 def gcgen_parse_files() -> List[str]:
