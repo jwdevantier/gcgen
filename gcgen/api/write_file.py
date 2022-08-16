@@ -36,8 +36,10 @@ class write_file(object):
 
     def __exit__(self, exc_type, _, __):
         if exc_type:
+            p = Path(self._fh.name)
             self._fh.close()
-            self._fh.unlink()
+            if p.exists():
+                p.unlink()
             return
 
         try:
