@@ -70,8 +70,6 @@ def gentest_test_eql(testcase: str, files: List[str]):
     "test equality between specific files"
     with load_gentest(testcase) as gtc:
         generate.compile(gtc.input_path)
-        errs_expected = {}
-        errs_actual = {}
         for file in files:
             src = gtc.input_path / file
             expected = gtc.expected_path / file
@@ -80,21 +78,7 @@ def gentest_test_eql(testcase: str, files: List[str]):
             with open(expected, "r") as fh:
                 expected_lines = fh.readlines()
 
-            if src_lines != expected_lines:
-                errs_expected[file] = expected_lines
-                errs_actual[file] = src_lines
-        if errs_expected != errs_actual:
-            for file in errs_actual.keys():
-                actual_lines = errs_actual[file]
-                expected_lines = errs_expected[file]
-                print(f"   ------------file: {file!s} (expected)------------")
-                for line in expected_lines:
-                    print(line, end="")
-                print(f"   ------------file: {file!s} (actual)------------")
-                for line in actual_lines:
-                    print(line, end="")
-        # breakpoint()
-        assert errs_expected == errs_actual
+            assert src_lines == expected_lines
 
 
 def test_aa_empty_conf_ok():
