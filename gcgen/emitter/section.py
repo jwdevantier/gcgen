@@ -33,7 +33,7 @@ class Section:
     necessary.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._buf: SectionBuf = SectionBuf([])
         # to ensure indent/dedent is balanced within a section
         self._indent_level = 0

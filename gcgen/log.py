@@ -14,8 +14,7 @@ class LogLevel(Enum):
     CRITICAL = logging.CRITICAL
 
 
-_default_loglevel = LogLevel.WARNING
-_current_log_level = None
+_current_log_level: Optional[LogLevel] = None
 _fallback_loglevels = {}
 
 
@@ -39,12 +38,14 @@ def get_logger(
 ) -> logging.Logger:
     """get a logger, use `__name__` by convention."""
     if not has_logger(name):
-        v = default_loglevel or _default_loglevel
-        if isinstance(v, LogLevel):
-            v = v.value
-        _fallback_loglevels[name] = v
+        v = default_loglevel or LogLevel.WARNING
+        assert isinstance(v, LogLevel)
+        _fallback_loglevels[name] = v.value
         l = logging.getLogger(name)
-        l.setLevel(_current_log_level or _fallback_loglevels[name])
+        if _current_log_level is not None:
+            l.setLevel(_current_log_level.value)
+        else:
+            l.setLevel(_fallback_loglevels[name])
         return l
     else:
         return logging.getLogger()
