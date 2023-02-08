@@ -27,4 +27,7 @@ setup(
     entry_points={"console_scripts": ["gcgen = gcgen.__main__:main"]},
     license="MIT",
     options={"bdist_wheel": {"universal": True}},
+    package_data = {
+        'gcgen': ['py.typed'],
+    },
 )
