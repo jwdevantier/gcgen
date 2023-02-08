@@ -1,6 +1,6 @@
 something before the unclosed snippet
-# <<? bar
+# <<? bar ?>>
 
 
-# <<? baz
-# ?>>
+# <<? baz ?>>
+# <<? /baz ?>>

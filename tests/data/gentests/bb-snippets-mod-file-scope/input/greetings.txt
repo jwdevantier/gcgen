@@ -1,10 +1,10 @@
-# <<? greet
+# <<? greet ?>>
 Hello, John Doe!
-# ?>>
+# <<? /greet ?>>
 
-# <<? modify-scope
-# ?>>
+# <<? modify-scope ?>>
+# <<? /modify-scope ?>>
 
-# <<? greet
+# <<? greet ?>>
 Hello, Jane Doe!
-# ?>>
+# <<? /greet ?>>

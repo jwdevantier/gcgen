@@ -1,11 +1,11 @@
-# <<? hello
-# ?>>
+# <<? hello ?>>
+# <<? /hello ?>>
 
-# <<? hello null
-# ?>>
+# <<? hello null ?>>
+# <<? /hello ?>>
 
-# <<? hello "Jane"
-# ?>>
+# <<? hello "Jane" ?>>
+# <<? /hello ?>>
 
-# <<? print_files ["/etc/passwd", "/etc/issue"]
-# ?>>
+# <<? print_files ["/etc/passwd", "/etc/issue"] ?>>
+# <<? /print_files ?>>

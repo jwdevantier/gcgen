@@ -1,7 +1,7 @@
 # bar snippet calls foo snippet directly, so uses the outer def of foo
-# <<? bar
-# ?>>
+# <<? bar ?>>
+# <<? /bar ?>>
 
 # delegates to foo, but uses dynamic lookup, so should use overridden foo def
-# <<? baz
-# ?>>
+# <<? baz ?>>
+# <<? /baz ?>>

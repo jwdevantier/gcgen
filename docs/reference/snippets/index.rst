@@ -31,8 +31,8 @@ respectively:
 
     def main():
         print("hello, world!")
-        # <<? my-snippet
-        # ?>>
+        # <<? my-snippet ?>>
+        # <<? /my-snippet ?>>
 
 
 .. code-block:: golang
@@ -44,8 +44,8 @@ respectively:
 
     func main() {
         fmt.Println("hello, world!")
-        // <<? my-snippet
-        // ?>>
+        // <<? my-snippet ?>>
+        // <<? /my-snippet ?>>
     }
 
 In these two examples, ``my-snippet`` is the name of the snippet called - this

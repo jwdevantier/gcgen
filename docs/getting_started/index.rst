@@ -27,8 +27,8 @@ addition (``add``), subtraction (``sub``), division (``div``) and multiplication
         return x % y
 
 
-    # <<? common_math_funcs [["add", "+"], ["sub", "-"], ["div", "/"], ["mul", "*"]]
-    # ?>>
+    # <<? common_math_funcs [["add", "+"], ["sub", "-"], ["div", "/"], ["mul", "*"]] ?>>
+    # <<? /common_math_funcs ?>>
 
 
     def exp(number, exponent):

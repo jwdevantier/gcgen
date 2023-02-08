@@ -2,13 +2,13 @@
 My outer file...
 
 First foo:
-# <<? foo
+# <<? foo ?>>
 foo from outer ctx!
 scope["some-var"]: <<some-outer-val>>
 /outer foo end
-# ?>>
+# <<? /foo ?>>
 
 Then bar:
-# <<? bar
+# <<? bar ?>>
 bar from outer ctx!
-# ?>>
+# <<? /bar ?>>

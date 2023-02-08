@@ -1,7 +1,7 @@
 
 something
-# <<? foo
-# ?>>
+# <<? foo ?>>
+# <<? /foo ?>>
 something else..
-# <<? bar
-# ?>>
+# <<? bar ?>>
+# <<? /bar ?>>

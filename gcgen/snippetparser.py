@@ -122,6 +122,7 @@ class ParserBase:
 
     def parse(self, fpath: Path, dpath: Path):
         snippet_start = self.snippet_start
+        snippet_start_len = len(snippet_start)
         snippet_end = self.snippet_end
         dst: Optional[TextIOWrapper]
 
@@ -137,45 +138,61 @@ class ParserBase:
                 prefix = snippet_name = ""  # only to satisfy type checker.
                 lineno = 0
                 while True:
-                    cont = False
+                    inside_snippet = False
                     for line in src:
                         lineno += 1
                         dst.write(line)
-                        ndx = line.find(snippet_start)
-                        if ndx != -1:
-                            cont = True
-                            prefix = line[0:ndx]
-                            parts = (
-                                line[ndx + len(snippet_start) :].strip().split(" ", 1)
-                            )
-                            if len(parts) == 1:
-                                snippet_name = parts[0]
-                                snippet_arg = None
-                            else:  # 2 parts, one possible JSON value
-                                snippet_name = parts[0]
-                                snippet_arg = parts[1].strip()
-                                if snippet_arg in ("", "null"):
-                                    snippet_arg = None
-                                else:
-                                    try:
-                                        snippet_arg_raw = snippet_arg
-                                        snippet_arg = json.loads(snippet_arg)
-                                    except JSONDecodeError as e:
-                                        raise SnippetJsonValueError(
-                                            fpath,
-                                            snippet_name,
-                                            snippet_arg_raw,
-                                            e,
-                                            lineno,
-                                        ) from e
-                            break
+                        s_start = line.find(snippet_start)
+                        if s_start == -1:
+                            continue
+                        # note: we deliberately start the search PAST the opening tag
+                        # (to support opening- and closing snippet tag being the same)
+                        # - we then add the offset of the end of the opening snippet tag to `s_end`
+                        # to again get the full line offset of where the end snippet tag is.
+                        s_end = line[s_start + snippet_start_len :].find(snippet_end)
+                        if s_end == -1:
+                            continue
+                        s_end += snippet_start_len + s_start
+                        prefix = line[0:s_start]
+                        inside_snippet = True
 
-                    if not cont:
+                        parts = (
+                            line[s_start + len(snippet_start) : s_end]
+                            .lstrip()
+                            .split(None, 1)
+                        )
+                        # -> parts: [<snippet_name: str>, <rest (args): str>]
+                        # if len(parts) == 1 -> No args
+                        # otherwise, arg.
+                        snippet_name = parts[0]
+                        if len(parts) == 1:
+                            snippet_arg = None
+                        else:
+                            snippet_arg = parts[1]
+                            if snippet_arg.strip() in ("", "null"):
+                                snippet_arg = None
+                            else:
+                                try:
+                                    snippet_arg_raw = snippet_arg
+                                    snippet_arg = json.loads(snippet_arg)
+                                except JSONDecodeError as e:
+                                    raise SnippetJsonValueError(
+                                        fpath,
+                                        snippet_name,
+                                        snippet_arg_raw,
+                                        e,
+                                        lineno,
+                                    ) from e
+
+                        # break out of loop, we are processing an open snippet now.
+                        break
+
+                    if not inside_snippet:
                         # we exhausted the file line iterator without finding a new opening
                         # snippet, hence we stop here (no error)
                         break
 
-                    s_end = f"{prefix}{snippet_end}"
+                    end_of_snippet = f"{prefix}{snippet_start}"
                     prefix_match = rgx_ws_prefix.match(prefix)
                     assert (
                         prefix_match is not None
@@ -187,22 +204,35 @@ class ParserBase:
                         f"snippet prefix: {snippet_prefix!r} (len: {len(snippet_prefix)})"
                     )
                     snippet_line_start = lineno
-                    cont = False
 
                     for line in src:
                         lineno += 1
-                        if line.startswith(s_end):
-                            self.on_snippet(
-                                snippet_prefix, snippet_name, snippet_arg, fpath, dst
-                            )
-                            dst.write(line)  # retain the snippet end line
-                            cont = True
-                            break
-                        elif line.find(snippet_start) != -1:
+                        if not line.startswith(end_of_snippet):
+                            continue
+
+                        # Should be [<snippet_name: str>, <snippet_end: str>, <OPT extra junk on the line>]
+                        snip_line_parts = line[len(end_of_snippet) :].split()
+                        if (
+                            len(snip_line_parts) < 2
+                            or snip_line_parts[1] != snippet_end
+                        ):
+                            raise Exception(f"malformed snippet {line!r}")
+                        elif (
+                            len(snip_line_parts[0]) > 0 and snip_line_parts[0][0] != "/"
+                        ):
                             raise NestedSnippetsError(
                                 fpath, snippet_name, snippet_line_start, lineno
                             )
-                    if not cont:
+                        elif snip_line_parts[0] != f"/{snippet_name}":
+                            raise Exception(f"invalid snippet end tag {line!r}")
+                        self.on_snippet(
+                            snippet_prefix, snippet_name, snippet_arg, fpath, dst
+                        )
+                        dst.write(line)  # retain the snippet end line
+                        inside_snippet = False
+                        break
+
+                    if inside_snippet:
                         # we exhausted the file line iterator without finding a corresponding
                         # snippet end, so we abort, this is an error
                         raise UnclosedSnippetError(

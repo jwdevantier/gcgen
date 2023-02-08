@@ -57,13 +57,13 @@ class CapturingParser(snippetparser.ParserBase):
 
 prog_w_noarg_snippets = """\
 print("hello, world")
-# <<? hello
-# ?>>
+# <<? hello ?>>
+# <<? /hello ?>>
 
 def foo():
     print("inside foo")
-    # <<? smth
-    # ?>>
+    # <<? smth ?>>
+    # <<? /smth ?>>
 """
 
 
@@ -79,22 +79,22 @@ def test_prog_w_noarg_snippets():
 
 prog_w_json_args = """\
 print("hello, world")
-# <<? hello
-# ?>>
-# <<? hello null
-# ?>>
-# <<? hello  
-# ?>>
-# <<? hello "Jacque"
-# ?>>
+# <<? hello ?>>
+# <<? /hello ?>>
+# <<? hello null ?>>
+# <<? /hello ?>>
+# <<? hello ?>>
+# <<? /hello ?>>
+# <<? hello "Jacque" ?>>
+# <<? /hello ?>>
 
 def foo():
     print("inside foo")
-    # <<? print_files ["file1", "file2"]
-    # ?>>
+    # <<? print_files ["file1", "file2"] ?>>
+    # <<? /print_files ?>>
     print("...")
-    # <<? mk_user {"username": "jane", "groups": ["wheel", "docker"]}
-    # ?>>
+    # <<? mk_user {"username": "jane", "groups": ["wheel", "docker"]} ?>>
+    # <<? /mk_user ?>>
 """
 
 

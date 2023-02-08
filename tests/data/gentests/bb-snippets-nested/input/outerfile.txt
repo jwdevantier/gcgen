@@ -2,9 +2,9 @@
 My outer file...
 
 First foo:
-# <<? foo
-# ?>>
+# <<? foo ?>>
+# <<? /foo ?>>
 
 Then bar:
-# <<? bar
-# ?>>
+# <<? bar ?>>
+# <<? /bar ?>>

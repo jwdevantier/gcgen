@@ -1,9 +1,9 @@
-# <<? bar
+# <<? bar ?>>
 outer bar!
 outer foo!
-# ?>>
+# <<? /bar ?>>
 
-# <<? baz
+# <<? baz ?>>
 outer baz!
 outer foo!
-# ?>>
+# <<? /baz ?>>

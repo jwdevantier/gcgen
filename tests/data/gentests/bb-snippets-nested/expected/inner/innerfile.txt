@@ -2,14 +2,14 @@
 My inner file!
 
 First foo:
-# <<? foo
+# <<? foo ?>>
 foo from outer ctx!
 scope["some-var"]: <<some-inner-val>>
 /outer foo end
-# ?>>
+# <<? /foo ?>>
 
 Then bar:
-# <<? bar
+# <<? bar ?>>
 bar from inner ctx!
 scope["other-val"]: <<other-outer-val>>
-# ?>>
+# <<? /bar ?>>
