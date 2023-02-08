@@ -1,6 +1,7 @@
 class SpecialChar:
     ...
 
+
 class Newline(SpecialChar):
     def __init__(self):
         ...
