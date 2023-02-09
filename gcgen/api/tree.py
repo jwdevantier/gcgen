@@ -213,44 +213,6 @@ class NodeVisitor(metaclass=NodeVisitorMeta):
 
 
 class NodeTransformerMeta(type):
-    """Base class with which to implement a transformer.
-
-    Implement a transformer, a type of class capable of traversing a tree and
-    to replace some/all of the traversed nodes as it does so.
-    Transformers are especially useful for implementing rewrite operations where
-    specific nodes are replaced/modified to make subsequent parsing and eventually
-    code generation easier.
-
-    To start traversal, pass the tree to the `transform` method.
-    Traversal works by defining a `transform` method on the transformer for each
-    type of node, which in turn calls `transform` on each of its child nodes
-    to continue traversing down the tree. The return value of each transform
-    handler should be the transformed sub-tree.
-    In this way, parts or all of the tree may be transformed as part of the
-    operation.
-
-    Note:
-        For every node for which there is no specific handler, `visit_default`
-        is called. The default behavior of `visit_default` is to raise a
-        `NotImplementedError`.
-        To install a visit handler, write a method taking 1 argument, `node`,
-        and decorate it using the `on_visit()` decorator, passing the decorator
-        one or more `Type` objects (~classes), marking the types of nodes to
-        handle using the method.
-
-    Note:
-        * inheritance works (unlike functools.singledispatchmethod)
-            * handlers are inherited, and can be overridden
-        * method names of handlers MUST remain unique. If defining several
-          handlers using the same method name, only the last handler is retained.
-        * handlers must be decorated with `on_visit` as the _last_ decorator,
-          wrapping handlers in other decorators breaks the ability to identify
-          a method as a handler.
-        * a single handler can handle multiple types of nodes, either by:
-            * decorating the handler multiple times using `@on_visit(...)`
-            * passing multiple arguments to `@on_visit(...)`
-    """
-
     def __new__(cls, name, bases, dct):
         typ = super().__new__(cls, name, bases, dct)
 
@@ -283,6 +245,43 @@ class NodeTransformerMeta(type):
 
 
 class NodeTransformer(metaclass=NodeTransformerMeta):
+    """Base class with which to implement a transformer.
+
+    Implement a transformer, a type of class capable of traversing a tree and
+    to replace some/all of the traversed nodes as it does so.
+    Transformers are especially useful for implementing rewrite operations where
+    specific nodes are replaced/modified to make subsequent parsing and eventually
+    code generation easier.
+
+    To start traversal, pass the tree to the `transform` method.
+    Traversal works by defining a `transform` method on the transformer for each
+    type of node, which in turn calls `transform` on each of its child nodes
+    to continue traversing down the tree. The return value of each transform
+    handler should be the transformed sub-tree.
+    In this way, parts or all of the tree may be transformed as part of the
+    operation.
+
+    Note:
+        For every node for which there is no specific handler, `transform_default` is called.
+        The default behavior of `transform_default` is to raise a `NotImplementedError`.
+        To install a transform handler, write a method taking 1 argument, `node`,
+        and decorate it using the `on_transform()` decorator, passing the decorator
+        one or more `Type` objects (~classes), marking the types of nodes to
+        handle using the method.
+
+    Note:
+        * inheritance works (unlike functools.singledispatchmethod)
+            * handlers are inherited, and can be overridden
+        * method names of handlers MUST remain unique. If defining several
+          handlers using the same method name, only the last handler is retained.
+        * handlers must be decorated with `on_transform` as the _last_ decorator,
+          wrapping handlers in other decorators breaks the ability to identify
+          a method as a handler.
+        * a single handler can handle multiple types of nodes, either by:
+            * decorating the handler multiple times using `@on_visit(...)`
+            * passing multiple arguments to `@on_visit(...)`
+    """
+
     def transform_default(self, node: Any) -> Any:
         """Default transform function for nodes of types for which there is no specific transform function.
 
