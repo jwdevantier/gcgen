@@ -1,3 +1,5 @@
+[build-system]
+requires = ['setuptools', 'mypy==1.0.0', 'typed-ast==1.5.4', "wheel"]
 [tool.black]
 extend-exclude = '''
 tests/data

@@ -1,5 +1,5 @@
 class SpecialChar:
-    ...
+    pass
 
 
 class Newline(SpecialChar):
@@ -63,7 +63,7 @@ class Padding(SpecialChar):
         self.__numlines = numlines
 
     @property
-    def numlines(self):
+    def numlines(self) -> int:
         return self.__numlines
 
     def __str__(self):

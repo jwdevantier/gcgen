@@ -1,6 +1,7 @@
 import os
 from setuptools import setup, find_packages
 from pathlib import Path
+from mypyc.build import mypycify
 
 
 PKG_ROOT = Path(__file__).parent
@@ -17,7 +18,7 @@ setup(
     description="generate code in any language or format",
     long_description=README,
     long_description_content_type="text/markdown",
-    classifiers=["Framework :: Pytest"],
+    classifiers=[],
     version=version,
     author="Jesper Wendel Devantier",
     author_email="jwd@defmacro.it",
@@ -26,8 +27,14 @@ setup(
     install_requires=[],
     entry_points={"console_scripts": ["gcgen = gcgen.__main__:main"]},
     license="MIT",
-    options={"bdist_wheel": {"universal": True}},
+    options={"bdist_wheel": {"universal": False}},
     package_data = {
         'gcgen': ['py.typed'],
     },
+    ext_modules=mypycify([
+        'gcgen/emitter/__init__.py',
+        'gcgen/emitter/emitter.py',
+        'gcgen/emitter/section.py',
+        'gcgen/emitter/special_chars.py',
+    ]),
 )
