@@ -10,6 +10,7 @@ class Scope:
     ability to add new entries, override entries and delete entries, all
     without changing any of the parent scopes.
     """
+    __slots__ = "_dict", "_outer"
 
     def __init__(self):
         self._dict = {}

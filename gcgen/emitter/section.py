@@ -1,5 +1,5 @@
 from typing import List, Union, NewType, Iterator
-from gcgen.emitter.special_chars import *
+from gcgen.emitter.special_chars import CtrlChr, Padding
 
 
 class SectionError(Exception):
@@ -10,7 +10,7 @@ class SectionDedentError(SectionError):
     msg = "dedent called too many times - trying to dedent out of minimum indentation"
 
 
-SectionElem = Union[str, "Section", "SpecialChar"]
+SectionElem = Union[str, "Section", CtrlChr, Padding]
 SectionBuf = NewType("SectionBuf", List[SectionElem])
 
 
@@ -32,6 +32,7 @@ class Section:
     more variable definitions to the start of a function as it becomes
     necessary.
     """
+    __slots__ = "_buf", "_indent_level"
 
     def __init__(self) -> None:
         self._buf: SectionBuf = SectionBuf([])
@@ -40,7 +41,7 @@ class Section:
 
     def newline(self) -> "Section":
         """add a newline."""
-        self._buf.append(NL)
+        self._buf.append(CtrlChr.Newline)
         return self
 
     def nl(self) -> "Section":
@@ -48,9 +49,9 @@ class Section:
 
     def freshline(self) -> "Section":
         """emit newline iff. not currently at the beginning of a line."""
-        if self._buf and self._buf[-1] in (FL, NL):
+        if self._buf and self._buf[-1] in (CtrlChr.Freshline, CtrlChr.Newline):
             return self
-        self._buf.append(FL)
+        self._buf.append(CtrlChr.Freshline)
         return self
 
     def fl(self) -> "Section":
@@ -76,7 +77,7 @@ class Section:
         Note: this function will cause a newline if the current line has any
         contents already written to it (using `emit`).
         """
-        self._buf.append(I)
+        self._buf.append(CtrlChr.Indent)
         self._indent_level += 1
         return self
 
@@ -88,7 +89,7 @@ class Section:
         Note: this function will cause a newline if the current line has any
         contents already written to it (using `emit`).
         """
-        self._buf.append(D)
+        self._buf.append(CtrlChr.Dedent)
         self._indent_level -= 1
         if self._indent_level < 0:
             raise SectionDedentError
@@ -114,7 +115,7 @@ class Section:
     def emitln(self, *elems: str) -> "Section":
         """Emit one or more string elements followed by a newline."""
         self.emit(*elems)
-        self._buf.append(NL)
+        self._buf.append(CtrlChr.Newline)
         return self
 
     def emitln_r(self, *elems: str) -> "Section":

@@ -367,7 +367,7 @@ def fmt_module_name(root: Path, modpath: Path) -> str:
     return ".".join(e.replace(" ", "_") for e in modname.parts)
 
 
-def import_from_path(root: Path, modpath: Path):
+def import_from_path(root: Path, modpath: Path) -> ModuleType:
     modname = fmt_module_name(root, modpath)
     spec = importlib.util.spec_from_file_location(modname, modpath)
     if spec is None:
@@ -389,118 +389,124 @@ def get_mod_snippet_fns(mod: ModuleType) -> Dict[str, Callable]:
     return {name: fn for name, fn in mod.__dict__.items() if decorators.is_snippet(fn)}
 
 
-def compile(root: Path, tag_start: str = "<<?", tag_end: str = "?>>"):
+def _compile(
+        root: Path,
+        tag_start: str,
+        tag_end: str,
+        path: Path,
+        parent_scope: Scope,
+        snippets_scope: Scope,
+        indent_by: Scope
+) -> None:
+    gcgen_mod = None
+    gcgen_conf_path = path / "gcgen_conf.py"
+    if gcgen_conf_path.exists():
+        gcgen_mod = import_from_path(root, gcgen_conf_path)
+    scope = parent_scope.derive()
+
+    exclude_dirs = []
+    if gcgen_mod is not None:
+        if hasattr(gcgen_mod, "gcgen_exclude_dirs"):
+            try:
+                exclude_dirs = gcgen_mod.gcgen_exclude_dirs()
+            except Exception as e:
+                logger.critical(
+                    f"error during execution of `gcgen_exclude_dirs` in {gcgen_conf_path!s}",
+                    exc_info=True,
+                )
+                raise CompileExcludeFilesError(gcgen_conf_path)
+
+        if hasattr(gcgen_mod, "gcgen_indent_by"):
+            indent_by = indent_by.derive()
+            mod_indent_by = gcgen_mod.gcgen_indent_by
+            if not isinstance(mod_indent_by, dict):
+                raise IndentByValueError(mod_indent_by, gcgen_conf_path)
+            indent_by.update(mod_indent_by)
+        # if fn to extend local scope exists, run it
+        if hasattr(gcgen_mod, "gcgen_scope_extend"):
+            try:
+                gcgen_mod.gcgen_scope_extend(scope)
+            except Exception as e:
+                logger.critical(
+                    f"error during execution of `gcgen_scope_extend` in {gcgen_conf_path!s}",
+                    exc_info=True,
+                )
+                raise CompileScopeExtendError(gcgen_conf_path) from e
+        # if one or more snippets are defined, extend scope
+        snippet_fns = list(get_mod_snippet_fns(gcgen_mod).values())
+        if snippet_fns:
+            snippets_scope = snippets_scope.derive()
+            for snippet_fn in snippet_fns:
+                for name in decorators.snippet_names(snippet_fn):
+                    snippets_scope[name] = snippet_fn
+
+    # traverse and compile in depth-first order, passing initialized scope
+    for p in path.iterdir():
+        if p.is_dir() and p.name not in exclude_dirs:
+            _compile(root, tag_start, tag_end, p, scope, snippets_scope, indent_by)
+
+    if gcgen_mod is None:
+        return
+
+    # operate from within the path containing the gcgen_conf.py we are currently processing
+    os.chdir(path)
+    # parse snippets in any files explicitly listed as having them
+    if hasattr(gcgen_mod, "gcgen_parse_files"):
+        try:
+            files = gcgen_mod.gcgen_parse_files()
+        except Exception as e:
+            logger.critical(
+                f"error during execution of `gcgen_parse_files` in {gcgen_conf_path!s}",
+                exc_info=True,
+            )
+            raise CompileParseFilesError(gcgen_conf_path) from e
+        parser = Parser(tag_start, tag_end, scope, snippets_scope, indent_by, root)
+        for file in files:
+            logger.info(f"Parsing {file!s}")
+            file = Path(file)
+            if str(file) != file.name:
+                logger.error(
+                    f"{file!s} - entries in `gcgen_parse_files` must be plain filenames, not paths!",
+                )
+                raise ParseFilesInvalidValue(file, gcgen_conf_path)
+
+            file = (path / file)
+            if file.is_symlink():
+                # symlinks need to be resolved, otherwise the atomic
+                # file replace at the end of the parse step will fail
+                file = file.resolve()
+            if not file.exists():
+                logger.error(
+                    f"{file!s} - Could not find file!",
+                )
+                raise ParseFileNotFoundError(file, gcgen_conf_path)
+            elif not file.is_file():
+                logger.error(
+                    f"{file!s} - expected a file, got something else!",
+                    extra={"file": str(file), "gcgen file": gcgen_conf_path},
+                )
+                raise ParseFileNotFileError(file, gcgen_conf_path)
+            file_scope = scope.derive()
+            parser.scope = file_scope
+            parser.parse(file, file)
+
+    # parse generators (functions which may create arbitrarily many files)
+    for name, fn in get_mod_generator_fns(gcgen_mod).items():
+        local_scope = scope.derive()
+        try:
+            fn(local_scope)
+        except Exception as e:
+            logger.error(
+                f"error executing generator function {name!s} in {gcgen_conf_path!s}",
+                exc_info=True,
+            )
+            raise CompileGeneratorFunctionError(name, gcgen_conf_path) from e
+
+def compile(root: Path, tag_start: str = "<<?", tag_end: str = "?>>") -> None:
     # in case `root` is a relative path like '.', resolve to absolute path
     # for later use, where cwd changes.
     root = root.resolve()
 
-    def _compile(
-        path: Path, parent_scope: Scope, snippets_scope: Scope, indent_by: Scope
-    ):
-        gcgen_mod = None
-        gcgen_conf_path = path / "gcgen_conf.py"
-        if gcgen_conf_path.exists():
-            gcgen_mod = import_from_path(root, gcgen_conf_path)
-        scope = parent_scope.derive()
-
-        exclude_dirs = []
-        if gcgen_mod is not None:
-            if hasattr(gcgen_mod, "gcgen_exclude_dirs"):
-                try:
-                    exclude_dirs = gcgen_mod.gcgen_exclude_dirs()
-                except Exception as e:
-                    logger.critical(
-                        f"error during execution of `gcgen_exclude_dirs` in {gcgen_conf_path!s}",
-                        exc_info=True,
-                    )
-                    raise CompileExcludeFilesError(gcgen_conf_path)
-
-            if hasattr(gcgen_mod, "gcgen_indent_by"):
-                indent_by = indent_by.derive()
-                mod_indent_by = gcgen_mod.gcgen_indent_by
-                if not isinstance(mod_indent_by, dict):
-                    raise IndentByValueError(mod_indent_by, gcgen_conf_path)
-                indent_by.update(mod_indent_by)
-            # if fn to extend local scope exists, run it
-            if hasattr(gcgen_mod, "gcgen_scope_extend"):
-                try:
-                    gcgen_mod.gcgen_scope_extend(scope)
-                except Exception as e:
-                    logger.critical(
-                        f"error during execution of `gcgen_scope_extend` in {gcgen_conf_path!s}",
-                        exc_info=True,
-                    )
-                    raise CompileScopeExtendError(gcgen_conf_path) from e
-            # if one or more snippets are defined, extend scope
-            snippet_fns = list(get_mod_snippet_fns(gcgen_mod).values())
-            if snippet_fns:
-                snippets_scope = snippets_scope.derive()
-                for snippet_fn in snippet_fns:
-                    for name in decorators.snippet_names(snippet_fn):
-                        snippets_scope[name] = snippet_fn
-
-        # traverse and compile in depth-first order, passing initialized scope
-        for p in path.iterdir():
-            if p.is_dir() and p.name not in exclude_dirs:
-                _compile(p, scope, snippets_scope, indent_by)
-
-        if gcgen_mod is None:
-            return
-
-        # operate from within the path containing the gcgen_conf.py we are currently processing
-        os.chdir(path)
-        # parse snippets in any files explicitly listed as having them
-        if hasattr(gcgen_mod, "gcgen_parse_files"):
-            try:
-                files = gcgen_mod.gcgen_parse_files()
-            except Exception as e:
-                logger.critical(
-                    f"error during execution of `gcgen_parse_files` in {gcgen_conf_path!s}",
-                    exc_info=True,
-                )
-                raise CompileParseFilesError(gcgen_conf_path) from e
-            parser = Parser(tag_start, tag_end, scope, snippets_scope, indent_by, root)
-            for file in files:
-                logger.info(f"Parsing {file!s}")
-                file = Path(file)
-                if str(file) != file.name:
-                    logger.error(
-                        f"{file!s} - entries in `gcgen_parse_files` must be plain filenames, not paths!",
-                    )
-                    raise ParseFilesInvalidValue(file, gcgen_conf_path)
-
-                file = (path / file)
-                if file.is_symlink():
-                    # symlinks need to be resolved, otherwise the atomic
-                    # file replace at the end of the parse step will fail
-                    file = file.resolve()
-                if not file.exists():
-                    logger.error(
-                        f"{file!s} - Could not find file!",
-                    )
-                    raise ParseFileNotFoundError(file, gcgen_conf_path)
-                elif not file.is_file():
-                    logger.error(
-                        f"{file!s} - expected a file, got something else!",
-                        extra={"file": str(file), "gcgen file": gcgen_conf_path},
-                    )
-                    raise ParseFileNotFileError(file, gcgen_conf_path)
-                file_scope = scope.derive()
-                parser.scope = file_scope
-                parser.parse(file, file)
-
-        # parse generators (functions which may create arbitrarily many files)
-        for name, fn in get_mod_generator_fns(gcgen_mod).items():
-            local_scope = scope.derive()
-            try:
-                fn(local_scope)
-            except Exception as e:
-                logger.error(
-                    f"error executing generator function {name!s} in {gcgen_conf_path!s}",
-                    exc_info=True,
-                )
-                raise CompileGeneratorFunctionError(name, gcgen_conf_path) from e
-
     indent_by = Scope()
     indent_by[""] = "   "
-    _compile(root, Scope(), Scope(), indent_by)
+    _compile(root, tag_start, tag_end, root, Scope(), Scope(), indent_by)

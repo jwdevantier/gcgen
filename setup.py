@@ -17,7 +17,7 @@ setup(
     description="generate code in any language or format",
     long_description=README,
     long_description_content_type="text/markdown",
-    classifiers=["Framework :: Pytest"],
+    classifiers=[],
     version=version,
     author="Jesper Wendel Devantier",
     author_email="jwd@defmacro.it",
@@ -27,7 +27,7 @@ setup(
     entry_points={"console_scripts": ["gcgen = gcgen.__main__:main"]},
     license="MIT",
     options={"bdist_wheel": {"universal": True}},
-    package_data = {
-        'gcgen': ['py.typed'],
+    package_data={
+        "gcgen": ["py.typed"],
     },
 )
