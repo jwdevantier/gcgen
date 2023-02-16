@@ -469,8 +469,11 @@ def compile(root: Path, tag_start: str = "<<?", tag_end: str = "?>>"):
                     )
                     raise ParseFilesInvalidValue(file, gcgen_conf_path)
 
-                # compute absolute path to file (needed by compiler)
-                file = (path / file).resolve()
+                file = (path / file)
+                if file.is_symlink():
+                    # symlinks need to be resolved, otherwise the atomic
+                    # file replace at the end of the parse step will fail
+                    file = file.resolve()
                 if not file.exists():
                     logger.error(
                         f"{file!s} - Could not find file!",
@@ -484,9 +487,7 @@ def compile(root: Path, tag_start: str = "<<?", tag_end: str = "?>>"):
                     raise ParseFileNotFileError(file, gcgen_conf_path)
                 file_scope = scope.derive()
                 parser.scope = file_scope
-                logger.debug(f"Input:\n{file.read_text()}")
                 parser.parse(file, file)
-                logger.debug(f"Output{file.read_text()}")
 
         # parse generators (functions which may create arbitrarily many files)
         for name, fn in get_mod_generator_fns(gcgen_mod).items():
