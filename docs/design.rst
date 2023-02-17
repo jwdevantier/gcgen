@@ -4,7 +4,7 @@ Design Choices
 ==============
 
 This document should give you a better idea of the principles behind the
-design of Ghostwriter. Hopefully this gives you a better sense of the
+design of gcgen. Hopefully this gives you a better sense of the
 tradeoffs involved and why each choice was made.
 
 Keep it simple (KISS)
