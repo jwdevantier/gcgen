@@ -39,11 +39,13 @@ class Emitter:
             elif elem == CtrlChr.Freshline:
                 if not fresh:
                     nls += 1
+                    fresh = True
                 continue
             elif elem == CtrlChr.Indent:
                 level += 1
                 if not fresh:
                     nls = 1
+                    fresh = True
                 continue
             elif elem == CtrlChr.Dedent:
                 level -= 1

@@ -51,6 +51,16 @@ def test_emitln_indent_emitln_dedent_emitln_2():
         e.emitln("three")
 
 
+def test_emit_indent_freshline_emit():
+    """found a bug where this sequence caused an unwanted additional newline"""
+    with write_file("aa-emit-indent-freshline-emitln.txt", indent_by="  ") as e:
+        e.emit("foo {")
+        e.indent()
+        e.freshline()
+        e.emitln("hello();")
+        print(repr(e._buf))
+
+
 def test_add_section_empty():
     # NOTE: if a section has no content, it won't generate an empty line
     # (if is essentially not affecting the output).
