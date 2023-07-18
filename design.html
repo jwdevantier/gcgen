@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Design Choices &#8212; gcgen  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installing gcgen" href="reference/installing_gcgen/index.html" />
+    <link rel="prev" title="Motivation" href="motivation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="design-choices">
+<span id="sec-design"></span><h1>Design Choices<a class="headerlink" href="#design-choices" title="Permalink to this heading">¶</a></h1>
+<p>This document should give you a better idea of the principles behind the
+design of gcgen. Hopefully this gives you a better sense of the
+tradeoffs involved and why each choice was made.</p>
+<section id="keep-it-simple-kiss">
+<h2>Keep it simple (KISS)<a class="headerlink" href="#keep-it-simple-kiss" title="Permalink to this heading">¶</a></h2>
+<p>This project does not try to radically redefine code-generation or
+introduce a novel hybrid template/code DSL.
+Instead it uses plain Python, introducing only the concept of a
+snippet, a region of code within a source file, whose contents is
+managed by a corresponding Python function which uses a simple section
+class to write plain lines of text and manage indentation.</p>
+<p>It’s very tempting to think a problem requires a new (bad) DSL, and
+even those DSLs which start out small and self-contained often bloat
+with features and complexity as an ever-increasing set of use-cases
+are supported.</p>
+</section>
+<section id="use-a-general-purpose-language-python">
+<h2>Use a general-purpose language (Python)<a class="headerlink" href="#use-a-general-purpose-language-python" title="Permalink to this heading">¶</a></h2>
+<p>Not using a bespoke DSL reduces the barrier to entry in two ways.
+Firstly, DSLs are very hard to get right, I learned this from fighting
+extensively with Terraform and Ansible, both wonderful tools with unfortunate
+DSLs.</p>
+<p>Secondly, using a widely used language with the standard approach to
+organizing the code means that existing code editors, IDEs and analysis
+tools just work.
+Refactoring, type analysis, linting and external libraries all work
+just as expected.</p>
+<p>Similarly, it allows a fringe tool to reap the benefits of popularity.
+The Python ecosystem has packages for interacting with pratically every
+database, serialization format that exists.</p>
+<p>Finally, if you are already familiar with Python, the barrier to entry is
+lower still. If not, knowledge of Python is much more transferable and
+conducive to CV polishing than expertise in a bespoke, fringe DSL.</p>
+</section>
+<section id="separate-code-generation-logic-from-regular-content">
+<h2>Separate code-generation logic from regular content<a class="headerlink" href="#separate-code-generation-logic-from-regular-content" title="Permalink to this heading">¶</a></h2>
+<p>There are two benefits to moving code-generation code out into separate
+Python files. Firstly, it reduces the amount of noise in the target files.
+Secondly, following a standard Python project structure is what ensures
+full support from IDE’s, code analysis- and unit-testing tools and more.
+It is also how it becomes easy to factor out common functionality into
+utility code and so on.</p>
+</section>
+<section id="mix-hand-written-and-generated-code-in-files">
+<h2>Mix hand-written and generated code in files<a class="headerlink" href="#mix-hand-written-and-generated-code-in-files" title="Permalink to this heading">¶</a></h2>
+<p>By allowing a mixture of hand-written and generated code in the same file,
+we encourage granular use of code-generation. This ideally prevents pulling
+in more and more code into templates.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gcgen</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jwdevantier&repo=gcgen&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Design Choices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#keep-it-simple-kiss">Keep it simple (KISS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-a-general-purpose-language-python">Use a general-purpose language (Python)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#separate-code-generation-logic-from-regular-content">Separate code-generation logic from regular content</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mix-hand-written-and-generated-code-in-files">Mix hand-written and generated code in files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/installing_gcgen/index.html">Installing gcgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/starting_a_project/index.html">Starting a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/gcgen_file/index.html">gcgen file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/scope/index.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/snippets/index.html">Snippets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/generators/index.html">Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/section/index.html">Section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api/index.html">gcgen API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="motivation.html" title="previous chapter">Motivation</a></li>
+      <li>Next: <a href="reference/installing_gcgen/index.html" title="next chapter">Installing gcgen</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Jesper Devantier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/design.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

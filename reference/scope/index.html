@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Scope &#8212; gcgen  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Snippets" href="../snippets/index.html" />
+    <link rel="prev" title="gcgen file" href="../gcgen_file/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="scope">
+<span id="sec-ref-scope"></span><h1>Scope<a class="headerlink" href="#scope" title="Permalink to this heading">¶</a></h1>
+<p>Every <a class="reference internal" href="../snippets/index.html#sec-ref-snippets"><span class="std std-ref">snippet</span></a> and <a class="reference internal" href="../generators/index.html#sec-ref-generators"><span class="std std-ref">generator</span></a>
+are handed a scope when they execute.</p>
+<p>Scopes work like nested dictionaries. Any new scope may be derived from an
+existing scope. This means that during lookup, the new scope will first consult
+its own entries, but if no entry is found, it will try its parent scope, and
+so on until either an entry is found, or there are no more parent scopes to
+search.</p>
+<section id="scope-examples">
+<h2>Scope Examples<a class="headerlink" href="#scope-examples" title="Permalink to this heading">¶</a></h2>
+<section id="get-value">
+<h3>Get Value<a class="headerlink" href="#get-value" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gcgen.api</span> <span class="kn">import</span> <span class="n">Scope</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="n">Scope</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Jane&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;surname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Doe&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">derive</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;surname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Peterson&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s3</span> <span class="o">=</span> <span class="n">s2</span><span class="o">.</span><span class="n">derive</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s3</span><span class="p">[</span><span class="s2">&quot;profession&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Programmer&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s3</span><span class="p">[</span><span class="s2">&quot;profession&quot;</span><span class="p">]</span>
+<span class="go">&#39;Programmer&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s3</span><span class="p">[</span><span class="s2">&quot;surname&quot;</span><span class="p">]</span>
+<span class="go">&#39;Peterson&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s3</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="go">&#39;Jane&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s3</span><span class="p">[</span><span class="s2">&quot;bank password&quot;</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;bank password&#39;</span>
+</pre></div>
+</div>
+<p>Note how entries from the inner-most scope have the highest precedence, as is
+shown when the surname redefined in <code class="docutils literal notranslate"><span class="pre">s2</span></code> overshadows the original value set in
+<code class="docutils literal notranslate"><span class="pre">s1</span></code>.</p>
+</section>
+<section id="set-value">
+<h3>Set value<a class="headerlink" href="#set-value" title="Permalink to this heading">¶</a></h3>
+<p>Here is an example to illustrate:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gcgen.api</span> <span class="kn">import</span> <span class="n">Scope</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="n">Scope</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Jane&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;surname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Doe&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">derive</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="go">&#39;Jane&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;John&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="go">&#39;John&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="go">&#39;Jane&#39;</span>
+</pre></div>
+</div>
+<p><em>Note</em>: setting a new value in a child scope just overshadows the original
+definition, it does not affect any of the parent states.</p>
+</section>
+<section id="remove-value">
+<h3>Remove value<a class="headerlink" href="#remove-value" title="Permalink to this heading">¶</a></h3>
+<p>Entries can be removed from a scope. Since modifying a scope should never impact
+the parent scope, removal is actually done by inserting a special object called
+a tombstone, to signal that the entry is removed and lookup should abort.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gcgen.api</span> <span class="kn">import</span> <span class="n">Scope</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="n">Scope</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Jane&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">derive</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="go">&#39;Jane&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">s2</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;name&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+<span class="go">&#39;Jane&#39;</span>
+</pre></div>
+</div>
+<p><em>Note</em>: ‘deleting’ an entry from a scope actually inserts a special entry which
+marks the entry as removed, overshadowing any previous definition. The operation
+does not impact any of the parent scopes.</p>
+</section>
+</section>
+<section id="how-the-scope-is-built">
+<h2>How the scope is built<a class="headerlink" href="#how-the-scope-is-built" title="Permalink to this heading">¶</a></h2>
+<p>The scope behaves like a dictionary, containing a set of variable definitions
+which are set within the <a class="reference internal" href="../gcgen_file/index.html#sec-ref-conf-extend"><span class="std std-ref">gcgen_scope_extend</span></a> of any
+<a class="reference internal" href="../gcgen_file/index.html#sec-ref-gcgen-file"><span class="std std-ref">gcgen files</span></a> on the path from the project root to
+the directory in which the snippet is being called or the generator is being
+run.</p>
+<p>Take the following project as an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>.
+├── gcgen_project.ini
+├── gcgen_conf.py
+└── src
+    ├── bar
+    │   └── impl
+    │       ├── file-a.py
+    │       ├── file-b.py
+    │       └── gcgen_conf.py
+    ├── foo
+    │   ├── gcgen_conf.py
+    │   └── impl
+    │       ├── gcgen_conf.py
+    │       └── my_file.py
+    └── gcgen_conf.py
+</pre></div>
+</div>
+<p>In this case, the scope given to any snippet executing in <code class="docutils literal notranslate"><span class="pre">file-a.py</span></code> would be
+built from:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in <code class="docutils literal notranslate"><span class="pre">./gcgen_conf.py</span></code> file (if defined)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in <code class="docutils literal notranslate"><span class="pre">./src/gcgen_conf.py</span></code> (if defined)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in the <code class="docutils literal notranslate"><span class="pre">src/bar/impl/gcgen_conf.py</span></code> file (if defined)</p></li>
+</ol>
+<p>Similarly, the scope given to any snippet executing in <code class="docutils literal notranslate"><span class="pre">my_file.py</span></code> would be
+built from:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in <code class="docutils literal notranslate"><span class="pre">./gcgen_conf.py</span></code> file (if defined)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in <code class="docutils literal notranslate"><span class="pre">./src/gcgen_conf.py</span></code> (if defined)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in <code class="docutils literal notranslate"><span class="pre">src/foo/gcgen_conf.py</span></code> (if defined)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> in <code class="docutils literal notranslate"><span class="pre">src/foo/impl/gcgen_conf.py</span></code> (if defined)</p></li>
+</ol>
+<p>To see how to implement the <code class="docutils literal notranslate"><span class="pre">gcgen_scope_extend</span></code> function, see
+<a class="reference internal" href="../gcgen_file/index.html#sec-ref-conf-extend"><span class="std std-ref">Extend the Scope</span></a>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">gcgen</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jwdevantier&repo=gcgen&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing_gcgen/index.html">Installing gcgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../starting_a_project/index.html">Starting a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gcgen_file/index.html">gcgen file</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scope</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scope-examples">Scope Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-the-scope-is-built">How the scope is built</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../snippets/index.html">Snippets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generators/index.html">Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../section/index.html">Section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">gcgen API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../gcgen_file/index.html" title="previous chapter">gcgen file</a></li>
+      <li>Next: <a href="../snippets/index.html" title="next chapter">Snippets</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Jesper Devantier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/reference/scope/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

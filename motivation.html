@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Motivation &#8212; gcgen  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Design Choices" href="design.html" />
+    <link rel="prev" title="Getting Started" href="getting_started/index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="motivation">
+<span id="sec-motivation"></span><h1>Motivation<a class="headerlink" href="#motivation" title="Permalink to this heading">¶</a></h1>
+<p><em>Warning</em> - this section will contain a great deal of pontification and reveal
+the author as being more than a little arrogant with a lecturing streak.
+Beyond that - you may wish to visit the <a class="reference internal" href="getting_started/index.html#sec-getting-started"><span class="std std-ref">Getting Started</span></a> section first to
+get a sense of how things work.</p>
+<section id="writing-reusable-code-is-hard">
+<h2>Writing reusable code is hard<a class="headerlink" href="#writing-reusable-code-is-hard" title="Permalink to this heading">¶</a></h2>
+<p>Programming languages often force you to trade code-size for complexity.
+The most complex features of a programming language typically lend themselves
+to reducing repetition. From functors in Ocaml to generics in C#, metaclasses
+in Python, macros in Lisp or implementing code-generation based on
+annotations in Java.</p>
+<p>Even if intimately familiar with these features, can you justify their
+complexity? Programming is generally a team effort, liberally using
+the most advanced features of your language, tend to create code
+which not all colleagues can follow or extend in meaningful ways.
+Simpler code is more inclusive code.</p>
+<p>On top of this, most organizations use multiple languages.
+Mastering the features of all to write reusable code becomes harder still.</p>
+<p>Additionally, while some organizations have internal package repositories,
+few have them for all languages used in the organization, so sharing code
+across projects becomes problematic. Writing and distributing reusable
+code is a hard problem.</p>
+</section>
+<section id="code-is-liability">
+<h2>Code is liability<a class="headerlink" href="#code-is-liability" title="Permalink to this heading">¶</a></h2>
+<p>On the other hand, writing reams of “simple”, repetitive code presents,
+another problem: code is a liability, not an asset. As a codebase grows,
+the architecture ossifies, it becomes harder to refactor, and keeping the
+code maintainable in face of changing requirements becomes increasingly
+expensive.</p>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Reusable code typically leverages advanced language features</dt><dd><ul>
+<li><p>May be harder to understand for colleagues, whether junior or unfamiliar with the language</p></li>
+<li><p>May be harder to debug and introspect - Java annotations and most macro systems are rightly feared because of this</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Organizations tend to accumulate languages, tools and frameworks over time</dt><dd><ul>
+<li><p>More languages and DSLs to master</p></li>
+<li><p>More code to manage, maintain and refactor</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Multiple configuration tools and DSLs in use</dt><dd><ul>
+<li><p>Do you grasp and exploit the features each provide to keep things DRY?</p></li>
+<li><p>Do your colleagues?</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">gcgen</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jwdevantier&repo=gcgen&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Motivation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#writing-reusable-code-is-hard">Writing reusable code is hard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-is-liability">Code is liability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/installing_gcgen/index.html">Installing gcgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/starting_a_project/index.html">Starting a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/gcgen_file/index.html">gcgen file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/scope/index.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/snippets/index.html">Snippets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/generators/index.html">Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/section/index.html">Section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api/index.html">gcgen API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="getting_started/index.html" title="previous chapter">Getting Started</a></li>
+      <li>Next: <a href="design.html" title="next chapter">Design Choices</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Jesper Devantier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/motivation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

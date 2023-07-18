@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>gcgen file &#8212; gcgen  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Scope" href="../scope/index.html" />
+    <link rel="prev" title="Starting a project" href="../starting_a_project/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="gcgen-file">
+<span id="sec-ref-gcgen-file"></span><h1>gcgen file<a class="headerlink" href="#gcgen-file" title="Permalink to this heading">¶</a></h1>
+<p>This page describes gcgen files, the files named <cite>gcgen_conf.py</cite> which may be located
+in any subdirectory of the project, and which drive all aspects of code
+generation using gcgen.</p>
+<p>The gcgen files provide hooks to modify the scope in the context of their
+directory and any subdirectories, hooks to specify which files should be parsed
+for snippets. Snippet and generator definitions, file indentation rules and
+more.</p>
+<p>gcgen requires a <cite>gcgen_conf.py</cite> file in each directory whose files might contain
+snippets to parse or where generators should create new files from scratch.
+This in turn encourages keeping snippet definitions and specific scope variables
+local to those subdirectories which use them.</p>
+<p>To see more about using gcgen in a new project, consult
+<a class="reference internal" href="../starting_a_project/index.html#sec-ref-new-project"><span class="std std-ref">Starting a project</span></a>.
+To better understand how the scope and subdirectories work together, see
+<a class="reference internal" href="../scope/index.html#sec-ref-scope"><span class="std std-ref">Scope</span></a>.</p>
+<p>Finally, this page will not cover defining <a class="reference internal" href="../snippets/index.html#sec-ref-snippets"><span class="std std-ref">snippets</span></a>
+or <a class="reference internal" href="../generators/index.html#sec-ref-generators"><span class="std std-ref">generators</span></a> see their sections for details on
+that.</p>
+<section id="parse-files">
+<span id="sec-ref-conf-parse-files"></span><h2>Parse files<a class="headerlink" href="#parse-files" title="Permalink to this heading">¶</a></h2>
+<p>When adding <a class="reference internal" href="../snippets/index.html#sec-ref-snippets"><span class="std std-ref">snippets</span></a> to a file, you also need to
+tell gcgen to parse that file for code-generation to work.</p>
+<p>In the same directory, create a <code class="docutils literal notranslate"><span class="pre">gcgen_conf.py</span></code> file and implement the
+<code class="docutils literal notranslate"><span class="pre">gcgen_parse_files</span></code> hook like so:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">gcgen_conf.py - parse files</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">def</span> <span class="nf">gcgen_parse_files</span><span class="p">():</span>
+<span class="linenos">2</span>    <span class="k">return</span> <span class="p">[</span>
+<span class="linenos">3</span>        <span class="s2">&quot;my_file.c&quot;</span><span class="p">,</span>
+<span class="linenos">4</span>        <span class="s2">&quot;my_other_file.go&quot;</span>
+<span class="linenos">5</span>    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>This extra step may seem onerous, but it drastically speeds up the compilation
+process, which would otherwise have to parse every file, line-by-line.
+Furthermore, it requires creating <code class="docutils literal notranslate"><span class="pre">gcgen_conf.py</span></code> files in each directory which
+uses gcgen for code-generation. This both makes it easier to identify where
+gcgen is used, and encourages keeping snippet definitions and relevant scope
+entries local to the consuming code.</p>
+<p>Since <code class="docutils literal notranslate"><span class="pre">gcgen_parse_files</span></code> is a function, you could generate the list of files:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">gcgen_conf.py - parse files, parse all python files</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="k">def</span> <span class="nf">gcgen_parse_files</span><span class="p">():</span>
+<span class="linenos">5</span>    <span class="c1"># return all .py files in the current directory</span>
+<span class="linenos">6</span>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.py&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="extend-the-scope">
+<span id="sec-ref-conf-extend"></span><h2>Extend the Scope<a class="headerlink" href="#extend-the-scope" title="Permalink to this heading">¶</a></h2>
+<p>The introduction touches on the <a class="reference internal" href="../../getting_started/index.html#sec-intro-compile"><span class="std std-ref">compile process</span></a>,
+noting that each gcgen file may implement a function which modifies the
+<a class="reference internal" href="../scope/index.html#sec-ref-scope"><span class="std std-ref">scope</span></a> passed to their own snippets &amp; generators, and all
+of their subdirectories.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">gcgen_conf.py - scope extend hook</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">gcgen.api</span> <span class="kn">import</span> <span class="n">Scope</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">gcgen_scope_extend</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="n">Scope</span><span class="p">):</span>
+<span class="linenos"> 5</span>    <span class="c1"># add some definitions</span>
+<span class="linenos"> 6</span>    <span class="n">scope</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Jane&quot;</span>
+<span class="linenos"> 7</span>    <span class="n">scope</span><span class="p">[</span><span class="s2">&quot;surname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Doe&quot;</span>
+<span class="linenos"> 8</span>    <span class="c1"># can also remove definitions</span>
+<span class="linenos"> 9</span>    <span class="c1"># (this does not affect the parent scope(s))</span>
+<span class="linenos">10</span>    <span class="k">del</span> <span class="n">scope</span><span class="p">[</span><span class="s2">&quot;something&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="configure-indentation">
+<h2>Configure indentation<a class="headerlink" href="#configure-indentation" title="Permalink to this heading">¶</a></h2>
+<p id="sec-ref-conf-indent-by">Each <a class="reference internal" href="../snippets/index.html#sec-ref-snippets"><span class="std std-ref">snippet</span></a> and <a class="reference internal" href="../generators/index.html#sec-ref-generators"><span class="std std-ref">generator</span></a>
+is passed an <a class="reference internal" href="../section/index.html#sec-ref-section"><span class="std std-ref">section</span></a> object which is used to produce
+the generated output and to indent &amp; dedent lines.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">gcgen_conf.py</span></code> file, you can define the characters used to indent on a
+per-filetype basis:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">gcgen_conf.py - configure indentation</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">gcgen.api</span> <span class="kn">import</span> <span class="n">Scope</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">gcgen_indent_by</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">5</span>    <span class="c1"># indent python files by 4 spaces</span>
+<span class="linenos">6</span>    <span class="s2">&quot;py&quot;</span><span class="p">:</span> <span class="s2">&quot;    &quot;</span><span class="p">,</span>
+<span class="linenos">7</span>    <span class="c1"># indent go files by one tab</span>
+<span class="linenos">8</span>    <span class="s2">&quot;go&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+<span class="linenos">9</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Typically, indentation would be defined in the top-level <code class="docutils literal notranslate"><span class="pre">gcgen_conf.py</span></code> file, for
+all subdirectories to inherit.
+However, a <code class="docutils literal notranslate"><span class="pre">gcgen_conf.py</span></code> in some subdirectory can implement <code class="docutils literal notranslate"><span class="pre">gcgen_indent_by</span></code>
+to configure indentation for further file types.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">gcgen</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jwdevantier&repo=gcgen&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing_gcgen/index.html">Installing gcgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../starting_a_project/index.html">Starting a project</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">gcgen file</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parse-files">Parse files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extend-the-scope">Extend the Scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-indentation">Configure indentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../scope/index.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snippets/index.html">Snippets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generators/index.html">Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../section/index.html">Section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">gcgen API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../starting_a_project/index.html" title="previous chapter">Starting a project</a></li>
+      <li>Next: <a href="../scope/index.html" title="next chapter">Scope</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Jesper Devantier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/reference/gcgen_file/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

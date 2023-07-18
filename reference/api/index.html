@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>gcgen API &#8212; gcgen  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Section" href="../section/index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="gcgen-api">
+<span id="sec-ref-api"></span><h1>gcgen API<a class="headerlink" href="#gcgen-api" title="Permalink to this heading">¶</a></h1>
+<p>This page covers the user-facing API of gcgen. The public API is entirely
+contained in the <code class="docutils literal notranslate"><span class="pre">gcgen.api</span></code> module.</p>
+<span class="target" id="module-gcgen.api"></span><dl class="py class">
+<dt class="sig sig-object py" id="gcgen.api.NodeTransformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">NodeTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.NodeTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class with which to implement a transformer.</p>
+<p>Implement a transformer, a type of class capable of traversing a tree and
+to replace some/all of the traversed nodes as it does so.
+Transformers are especially useful for implementing rewrite operations where
+specific nodes are replaced/modified to make subsequent parsing and eventually
+code generation easier.</p>
+<p>To start traversal, pass the tree to the <cite>transform</cite> method.
+Traversal works by defining a <cite>transform</cite> method on the transformer for each
+type of node, which in turn calls <cite>transform</cite> on each of its child nodes
+to continue traversing down the tree. The return value of each transform
+handler should be the transformed sub-tree.
+In this way, parts or all of the tree may be transformed as part of the
+operation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For every node for which there is no specific handler, <cite>transform_default</cite> is called.
+The default behavior of <cite>transform_default</cite> is to raise a <cite>NotImplementedError</cite>.
+To install a transform handler, write a method taking 1 argument, <cite>node</cite>,
+and decorate it using the <cite>on_transform()</cite> decorator, passing the decorator
+one or more <cite>Type</cite> objects (~classes), marking the types of nodes to
+handle using the method.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>inheritance works (unlike functools.singledispatchmethod)</dt><dd><ul>
+<li><p>handlers are inherited, and can be overridden</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>method names of handlers MUST remain unique. If defining several
+handlers using the same method name, only the last handler is retained.</p></li>
+<li><p>handlers must be decorated with <cite>on_transform</cite> as the _last_ decorator,
+wrapping handlers in other decorators breaks the ability to identify
+a method as a handler.</p></li>
+<li><dl class="simple">
+<dt>a single handler can handle multiple types of nodes, either by:</dt><dd><ul>
+<li><p>decorating the handler multiple times using <cite>&#64;on_visit(…)</cite></p></li>
+<li><p>passing multiple arguments to <cite>&#64;on_visit(…)</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.NodeTransformer.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#gcgen.api.NodeTransformer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform node <cite>node</cite>.</p>
+<p>Transform node. If a specific handler is registered for the node’s exact type,
+use it. Otherwise, call <cite>transform_default</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – the node to transform</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of calling the transform handler, may be a new, transformed
+node, may be the same node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.NodeTransformer.transform_default">
+<span class="sig-name descname"><span class="pre">transform_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#gcgen.api.NodeTransformer.transform_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default transform function for nodes of types for which there is no specific transform function.</p>
+<p>This method defines the default action when calling <cite>transform</cite> on a node for
+which handler has been defined for the node’s exact type.
+The default behavior is to raise an error, but this method may be overridden
+by a deriving class to e.g. return back the same object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – the node to transform. This node is of a type for which the transformer
+has no existing <cite>transform</cite> function.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Raises the <cite>NotImplementedError</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gcgen.api.NodeVisitor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">NodeVisitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.NodeVisitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class with which to implement a visitor.</p>
+<p>Implement a visitor, a type of class capable of traversing a tree by
+using a series of visit operations, one per type of node, to traverse the tree.
+Visitors are especially useful for implementing validation of nodes in the
+tree and for traversing trees as part of the code-generation step.</p>
+<p>To start traversal, pass the tree to the <cite>visit</cite> method.
+Traversal works by defining a <cite>visit</cite> method on the visitor for each
+type of node, which in turn calls <cite>visit</cite> on each of its child nodes
+to continue traversing down the tree.
+This approach is named visitor after the GoF “Visitor” pattern.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For every node for which there is no specific handler, <cite>visit_default</cite>
+is called. The default behavior of <cite>visit_default</cite> is to raise a
+<cite>NotImplementedError</cite>.
+To install a visit handler, write a method taking 1 argument, <cite>node</cite>,
+and decorate it using the <cite>on_visit()</cite> decorator, passing the decorator
+one or more <cite>Type</cite> objects (~classes), marking the types of nodes to
+handle using the method.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>inheritance works (unlike functools.singledispatchmethod)</dt><dd><ul>
+<li><p>handlers are inherited, and can be overridden</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>method names of handlers MUST remain unique. If defining several
+handlers using the same method name, only the last handler is retained.</p></li>
+<li><p>handlers must be decorated with <cite>on_visit</cite> as the _last_ decorator,
+wrapping handlers in other decorators breaks the ability to identify
+a method as a handler.</p></li>
+<li><dl class="simple">
+<dt>a single handler can handle multiple types of nodes, either by:</dt><dd><ul>
+<li><p>decorating the handler multiple times using <cite>&#64;on_visit(…)</cite></p></li>
+<li><p>passing multiple arguments to <cite>&#64;on_visit(…)</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.NodeVisitor.visit">
+<span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#gcgen.api.NodeVisitor.visit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visit node <cite>node</cite>.</p>
+<p>Visit node. If a specific handler is registered for the node’s exact type,
+use it. Otherwise, call <cite>visit_default</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – the node to visit</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.NodeVisitor.visit_default">
+<span class="sig-name descname"><span class="pre">visit_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#gcgen.api.NodeVisitor.visit_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default visit function for nodes of types for which there is no specific visit function.</p>
+<p>This method defines the default action when calling <cite>visit</cite> on a node for
+which handler has been defined for the node’s exact type.
+The default behavior is to raise an error, but this method may be overridden
+by a deriving class to e.g. trigger a NOOP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – the node to visit. This node is of a type for which the visitor
+has no existing <cite>visit</cite> function.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gcgen.api.Scope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">Scope</span></span><a class="headerlink" href="#gcgen.api.Scope" title="Permalink to this definition">¶</a></dt>
+<dd><p>A scope is a form of layered dictionary, where derived/child scopes
+indirectly inherit all entries visible from the parent scope, with the
+ability to add new entries, override entries and delete entries, all
+without changing any of the parent scopes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Scope.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Scope" title="gcgen.scope.Scope"><span class="pre">Scope</span></a></span></span><a class="headerlink" href="#gcgen.api.Scope.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a shallow copy of scope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A shallow copy of this scope.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Scope.derive">
+<span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Scope" title="gcgen.scope.Scope"><span class="pre">Scope</span></a></span></span><a class="headerlink" href="#gcgen.api.Scope.derive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a child scope with this scope as its parent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly created child scope.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Scope.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.Scope.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get entry in scope identified by <cite>key</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – key identifying to value to get</p></li>
+<li><p><strong>default</strong> – the value to return if the entry is not found</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value associated <cite>key</cite> or the given <cite>default</cite> value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Scope.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#gcgen.api.Scope.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>flatten scopes out to a dict.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Scope.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.Scope.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update scope with all entries from <cite>other</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gcgen.api.Section">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">Section</span></span><a class="headerlink" href="#gcgen.api.Section" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for storing (buffered) text/code output.</p>
+<p>A section is an abstraction of text writing which provides 2 capabilities:
+1. It provides a way to control indentation
+2. It provides a way to nest Section(s) within a Section</p>
+<p>(1) The indentation abstraction facilitates composition and reuse of
+generator code, because each helper function only needs to call <cite>indent()</cite>/
+<cite>dedent()</cite> to adjust line indentation, rather than embedding a fixed,
+absolute amount of indentation into the strings of each line written out.</p>
+<p>(2) By allowing a section to contain other sections, it becomes possible to
+define ‘placeholders’ which can be filled out at a later time. Effectively
+making it possible to define the final output out of order, e.g. adding
+more variable definitions to the start of a function as it becomes
+necessary.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.add_section">
+<span class="sig-name descname"><span class="pre">add_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.add_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add section to be filled in when desired.</p>
+<p>Adds provided section object such that its contents will be preceded by
+the current contents of this section and superceded by any subsequently
+added contents to this section.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.dedent">
+<span class="sig-name descname"><span class="pre">dedent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.dedent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dedent lines by one.</p>
+<p>Causes all future lines to be indented one level less.</p>
+<p>Note: this function will cause a newline if the current line has any
+contents already written to it (using <cite>emit</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.emit">
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">elems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.emit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emit one or more string elements.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.emitln">
+<span class="sig-name descname"><span class="pre">emitln</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">elems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.emitln" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emit one or more string elements followed by a newline.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.emitln_l">
+<span class="sig-name descname"><span class="pre">emitln_l</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">elems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.emitln_l" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emit line, then dedent.</p>
+<p>NOTE: deprecated, use <cite>sec.emitln(…).dedent()</cite> instead.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.emitln_r">
+<span class="sig-name descname"><span class="pre">emitln_r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">elems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.emitln_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write line, then indent.</p>
+<p>NOTE: deprecated, use <cite>sec.emitln(…).indent()</cite> instead</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.ensure_padding_lines">
+<span class="sig-name descname"><span class="pre">ensure_padding_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.ensure_padding_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure (at least) <cite>n</cite> empty lines of padding between two sections</p>
+<p>NOTE: if this is the top-level buffer and it is empty, this becomes a NO-OP</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.fl">
+<span class="sig-name descname"><span class="pre">fl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.fl" title="Permalink to this definition">¶</a></dt>
+<dd><p>emit newline iff. not currently at the beginning of a line.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.freshline">
+<span class="sig-name descname"><span class="pre">freshline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.freshline" title="Permalink to this definition">¶</a></dt>
+<dd><p>emit newline iff. not currently at the beginning of a line.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.indent">
+<span class="sig-name descname"><span class="pre">indent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.indent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indent subsequent lines.</p>
+<p>Causes all future lines to be indented one level more.</p>
+<p>Note: this function will cause a newline if the current line has any
+contents already written to it (using <cite>emit</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gcgen.api.Section.newline">
+<span class="sig-name descname"><span class="pre">newline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a></span></span><a class="headerlink" href="#gcgen.api.Section.newline" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a newline.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gcgen.api.generator">
+<span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark decorated callable as a generator.</p>
+<p>This decorator does nothing except install an attribute on the callable,
+identifying it as a generator.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gcgen.api.get_snippet">
+<span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">get_snippet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scope:</span> <span class="pre">~gcgen.scope.Scope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snippet:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;object</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gcgen.api.Section" title="gcgen.emitter.section.Section"><span class="pre">Section</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gcgen.api.Scope" title="gcgen.scope.Scope"><span class="pre">Scope</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Json</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Json</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Json</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Json</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#gcgen.api.get_snippet" title="Permalink to this definition">¶</a></dt>
+<dd><p>dynamically resolve definition of snippet <cite>snippet</cite>.</p>
+<p>NOTE: snippets resolving other snippets using this function allow
+configuration files in subdirectories to override those snippets
+in their local context.
+This can provide local contexts the freedom to reuse a global/
+common snippet, while overriding specific parts refactored
+out as other snippets which are resolved dynamically.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gcgen.api.on_transform">
+<span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">on_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">node_types</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.on_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark method as handler for transformations of nodes of type <cite>node_type</cite> or in <cite>node_types</cite>.</p>
+<p>Use this decorator on methods in a <cite>NodeTransformer</cite> class to mark methods as
+handlers for calls to <cite>transform</cite> when providing <cite>node_type</cite> or any of the types
+in <cite>node_types</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_type</strong> – node_type for which this handler should be used</p></li>
+<li><p><strong>*node_types</strong> – (optional) additional node_types for which to use this handler</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decorated handler object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gcgen.api.on_visit">
+<span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">on_visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">node_types</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.on_visit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark method as handler for visits of nodes of type <cite>node_type</cite> or in <cite>node_types</cite>.</p>
+<p>Use this decorator on methods in a <cite>NodeVisitor</cite> class to mark methods as
+handlers for calls to <cite>visit</cite> when providing <cite>node_type</cite> or any of the types
+in <cite>node_types</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_type</strong> – node_type for which this handler should be used</p></li>
+<li><p><strong>*node_types</strong> – (optional) additional node_types for which to use this handler</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decorated handler object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gcgen.api.parse_tree">
+<span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">parse_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gcgen.api.NodeVisitor" title="gcgen.api.tree.NodeVisitor"><span class="pre">NodeVisitor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#gcgen.api.NodeTransformer" title="gcgen.api.tree.NodeTransformer"><span class="pre">NodeTransformer</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#gcgen.api.parse_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse tree by applying a series of visitors and transformers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pipeline</strong> – A series of operations to perform on the tree, each of which
+is a visitor or transformer.</p></li>
+<li><p><strong>tree</strong> – The input tree/model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting tree/model from applying each operation in order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gcgen.api.snippet">
+<span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">snippet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.snippet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark decorated callable as a snippet.</p>
+<p>This decorator does nothing except install some attributes on the
+callable, identifying it as a snippet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – the name to identify the snippet by.
+(Note) can decorate multiple times to provide aliases</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A decorator function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gcgen.api.write_file">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gcgen.api.</span></span><span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gcgen.api.write_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context manager to safely write a file using an Section.</p>
+<p>If the context manager finishes successfully, then the file identified by
+<cite>fpath</cite> is replaced atomically by the temporary file which contains the
+new contents.
+If the context manager is exiting due to an exception, the temporary file
+is removed and the file at <cite>fpath</cite> (if any) is untouched.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fpath</strong> – path to the file to write.
+(recommended to only write files in the same directory)</p></li>
+<li><p><strong>indent_by</strong> – what to write for each level of indentation
+defaults to a single space (’ ‘).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">gcgen</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jwdevantier&repo=gcgen&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">Design Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing_gcgen/index.html">Installing gcgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../starting_a_project/index.html">Starting a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gcgen_file/index.html">gcgen file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scope/index.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snippets/index.html">Snippets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generators/index.html">Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../section/index.html">Section</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">gcgen API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.NodeTransformer"><code class="docutils literal notranslate"><span class="pre">NodeTransformer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.NodeVisitor"><code class="docutils literal notranslate"><span class="pre">NodeVisitor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.Scope"><code class="docutils literal notranslate"><span class="pre">Scope</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.generator"><code class="docutils literal notranslate"><span class="pre">generator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.get_snippet"><code class="docutils literal notranslate"><span class="pre">get_snippet()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.on_transform"><code class="docutils literal notranslate"><span class="pre">on_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.on_visit"><code class="docutils literal notranslate"><span class="pre">on_visit()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.parse_tree"><code class="docutils literal notranslate"><span class="pre">parse_tree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.snippet"><code class="docutils literal notranslate"><span class="pre">snippet()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gcgen.api.write_file"><code class="docutils literal notranslate"><span class="pre">write_file</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../section/index.html" title="previous chapter">Section</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Jesper Devantier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/reference/api/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
